@@ -13,7 +13,7 @@ class CrowdSafetyAgent:
         """Initialize the Crowd Safety Agent with Llama 4 API"""
         # Configure for Llama 4 API - adjust base_url as needed for your provider
         self.llm = ChatOpenAI(
-            api_key=api_key,
+            api_key=os.getenv("LLAMA_API_KEY"),
             model="llama-4",  # Adjust model name as provided
             base_url=base_url,  # Set this to your Llama 4 API endpoint
             temperature=0.1
@@ -29,7 +29,7 @@ class CrowdSafetyAgent:
         )
         
         # Create Roboflow model
-        self.rf = Roboflow(api_key=os.getenv("ROBOFLOW_API_KEY"))
+        self.rf = RoboFlow(api_key=os.getenv("ROBOFLOW_API_KEY"))
         self.project = self.rf.workspace().project("visao-computacional-ywewq")
         self.model = self.project.version(15).model     
     
