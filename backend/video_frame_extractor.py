@@ -2,13 +2,12 @@ import cv2
 import os
 
 # seperate func so it can be reused for live feed if needed
-def save_frame_as_jpg(frame, output_dir, idx):
+def save_frame_as_jpg(frame, output_dir, idx, timestamp_ms):
     """
-    Saves a single frame (numpy array) as a JPG in output_dir with a sequential name.
-    Returns the file path.
+    Saves a single frame as a JPG with index and timestamp in filename.
     """
     os.makedirs(output_dir, exist_ok=True)
-    out_path = os.path.join(output_dir, f"frame_{idx:04d}.jpg")
+    out_path = os.path.join(output_dir, f"frame_{idx:04d}_{timestamp_ms}ms.jpg")
     cv2.imwrite(out_path, frame)
     return out_path
 
@@ -17,19 +16,22 @@ def save_frame_as_jpg(frame, output_dir, idx):
 def extract_frames_every_n(video_path, output_dir="video_frames", n=30):
     """
     Extracts every n-th frame from the input video and saves as JPGs in output_dir.
+    Filenames include frame index and timestamp in ms.
     Returns a list of file paths to the saved frames.
     """
     cap = cv2.VideoCapture(video_path)
     frame_count = 0
     saved_paths = []
     idx = 0
+    fps = cap.get(cv2.CAP_PROP_FPS)
 
     while True:
         ret, frame = cap.read()
         if not ret:
             break
         if frame_count % n == 0:
-            out_path = save_frame_as_jpg(frame, output_dir, idx)
+            timestamp_ms = int((frame_count / fps) * 1000) if fps > 0 else frame_count * n
+            out_path = save_frame_as_jpg(frame, output_dir, idx, timestamp_ms)
             saved_paths.append(out_path)
             idx += 1
         frame_count += 1
