@@ -3,3 +3,5 @@ frontend/node_modules
 .env
 /.venv
 /backend/test.py
+/workingtools.py
+/backend/agents/test.py
