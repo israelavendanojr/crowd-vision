@@ -2,6 +2,6 @@ from flask import Blueprint
 
 main_routes = Blueprint('main_routes', __name__)
 
-@main_routes.route('/')
+@main_routes.route('/api/')
 def home():
-    return "Hello, from the routes folder!"
+    return {"message": "Hello, from the backend!!"}
