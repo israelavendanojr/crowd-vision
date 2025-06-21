@@ -5,3 +5,5 @@ frontend/node_modules
 /backend/test.py
 /workingtools.py
 /backend/agents/test.py
+/backend/data
+/backend/agents/__pycache__
