@@ -7,6 +7,7 @@ import json
 import os
 from datetime import datetime
 from roboflow import RoboFlow
+import base64
 
 class CrowdSafetyAgent:
     def __init__(self, api_key: str, base_url: str = None):
@@ -96,37 +97,43 @@ Thought: {agent_scratchpad}"""
     
     # Tool implementations - replace these with your actual CV/RAG pipelines
     def _analyze_crowd_density(self, image_path: str) -> str:
-        
         result = self.model.predict(image_path,confidence=0.01).json()
         return result
         
         
     
-    def _describe_scene(self, input_data: str) -> str:
-        """CV-to-Language Pipeline: Scene description"""
-        # TODO: Replace with actual CV-to-language model
-        # Implementation steps:
-        # 1. Load image/video frame
-        # 2. Run vision-language model (BLIP, LLaVA, etc.)
-        # 3. Generate contextual description
-        # 4. Extract behavioral indicators
+    def _describe_scene(self, image_path: str) -> str:
+        # Read and encode the image as base64 string
+        with open(image_path, "rb") as img_file:
+            encoded_img = base64.b64encode(img_file.read()).decode("utf-8")
+
+        # Construct the messages for the LLaMA chat API with image input
+        messages = [
+            {
+                "role": "system",
+                "content": "You are an expert visual scene describer. Provide a detailed and concise description of the image."
+            },
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Describe the scene shown in this image."},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{encoded_img}"
+                        }
+                    }
+                ]
+            }
+        ]
+
+        # Call the LLaMA chat API via your initialized client
+        response = self.llm.invoke(messages)
+
+        # Return the textual description from the response
+        return response.content
         
-        return json.dumps({
-            "scene_description": "Large crowd at outdoor music festival. People are tightly packed near the main stage area. Many individuals are pushing forward, with raised arms and excited expressions. Some people appear distressed near the barriers. Security personnel visible but outnumbered.",
-            "crowd_behavior": {
-                "energy_level": "very_high", 
-                "mood": "excited_but_agitated",
-                "movement": "surging_forward",
-                "concerning_behaviors": ["pushing", "crowd_surge", "barrier_pressure"]
-            },
-            "environmental_factors": {
-                "lighting": "evening_low_light",
-                "weather": "clear",
-                "venue_type": "outdoor_festival"
-            },
-            "safety_observations": ["people_against_barriers", "limited_exit_visibility", "security_overwhelmed"]
-        })
-    
+        
     def _lookup_safety_guidelines(self, situation: str) -> str:
         """RAG Pipeline: Safety guidelines lookup"""
         # TODO: Replace with actual RAG implementation
