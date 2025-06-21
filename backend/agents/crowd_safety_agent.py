@@ -6,6 +6,7 @@ from typing import List, Dict, Any
 import json
 import os
 from datetime import datetime
+from roboflow import RoboFlow
 
 class CrowdSafetyAgent:
     def __init__(self, api_key: str, base_url: str = None):
@@ -26,6 +27,11 @@ class CrowdSafetyAgent:
             max_iterations=5,
             handle_parsing_errors=True
         )
+        
+        # Create Roboflow model
+        self.rf = Roboflow(api_key=os.getenv("ROBOFLOW_API_KEY"))
+        self.project = self.rf.workspace().project("visao-computacional-ywewq")
+        self.model = self.project.version(15).model     
     
     def _create_tools(self) -> List[Tool]:
         """Create the three required tools for crowd safety analysis"""
@@ -89,27 +95,12 @@ Thought: {agent_scratchpad}"""
         return create_react_agent(self.llm, self.tools, prompt)
     
     # Tool implementations - replace these with your actual CV/RAG pipelines
-    def _analyze_crowd_density(self, input_data: str) -> str:
-        """CV Pipeline: Crowd density detection"""
-        # TODO: Replace with actual computer vision pipeline
-        # Implementation steps:
-        # 1. Decode base64 image/load video frame
-        # 2. Run person detection (YOLO, etc.)
-        # 3. Calculate density metrics
-        # 4. Detect movement patterns
+    def _analyze_crowd_density(self, image_path: str) -> str:
         
-        return json.dumps({
-            "people_count": 245,
-            "density_level": "moderate-high",
-            "density_per_sqm": 3.2,
-            "movement_patterns": {
-                "flow_direction": "toward_stage",
-                "bottlenecks": ["main_entrance", "concession_area"],
-                "stagnant_areas": ["back_section"]
-            },
-            "risk_indicators": ["approaching_high_density", "bottleneck_formation"],
-            "confidence": 0.87
-        })
+        result = self.model.predict(image_path,confidence=0.01).json()
+        return result
+        
+        
     
     def _describe_scene(self, input_data: str) -> str:
         """CV-to-Language Pipeline: Scene description"""
