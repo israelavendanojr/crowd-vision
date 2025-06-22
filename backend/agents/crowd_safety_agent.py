@@ -1,5 +1,6 @@
 from llama_api_client import LlamaAPIClient
 from roboflow import Roboflow
+from rag_utils import load_vectorstore, search_similar_chunks  # Add this import
 import os
 import base64
 
@@ -94,3 +95,27 @@ class CrowdSafetyAgent:
         
         return response.completion_message.content.text
         
+    def lookup_guidelines(self, situation: str, top_k: int = 3) -> str:
+        if not load_vectorstore():
+            return "Vector store not found. Please initialize first."
+
+        relevant_chunks = search_similar_chunks(situation, top_k)
+        if not relevant_chunks:
+            return "No relevant safety guidelines found."
+
+        context = "\n\n".join([chunk['text'] for chunk in relevant_chunks])
+        prompt = (
+            f"You are a safety policy expert analyzing crowd situations. "
+            f"Given the safety guidelines below and the situation description, "
+            f"offer a detailed response with specific safety recommendations.\n\n"
+            f"SAFETY GUIDELINES:\n{context}\n\n"
+            f"SITUATION: {situation}\n\n"
+            f"Please provide clear, specific safety actions or protocol recommendations."
+        )
+
+        response = self.client.chat.completions.create(
+            model="Llama-4-Maverick-17B-128E-Instruct-FP8",
+            messages=[{"role": "user", "content": prompt}],
+        )
+
+        return response.completion_message.content.text
