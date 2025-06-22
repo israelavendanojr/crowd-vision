@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import pickle
 from rag_utils import (
     extract_pdf_text,
     chunk_documents,
@@ -42,10 +43,11 @@ def initialize_from_pdf_folder(folder_path):
     print(f"Total: {total_chars} characters, {len(all_chunks)} chunks.")
     chunk_texts = [chunk['text'] for chunk in all_chunks]
     success = embed_chunks(chunk_texts)
-
+    
     if success:
-        import pickle
+        print("Here")
         with open("data/safety_vector_index_sources.pkl", 'wb') as f:
+            print("here2")
             pickle.dump(all_chunks, f)
 
     return success

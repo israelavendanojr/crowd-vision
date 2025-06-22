@@ -1,9 +1,9 @@
 from llama_api_client import LlamaAPIClient
 from roboflow import Roboflow
-from rag_utils import load_vectorstore, search_similar_chunks  # Add this import
+from rag_utils import load_vectorstore, search_similar_chunks
 import os
 import base64
-
+import re
 
 class CrowdSafetyAgent:
     def __init__(self):
@@ -23,7 +23,6 @@ class CrowdSafetyAgent:
         
         # Total people only sees the number of people in this specific frame
         total_people = len(predictions)
-        self.people += total_people
         return result
     
     def grid_analyze_crowd(self, folder_path: str) -> str:
@@ -37,29 +36,40 @@ class CrowdSafetyAgent:
             str: description of each folder
         """
         res = ""
+        
+        ## Getresponse_crowd -> Lookup Guidelings -> Summarize Guideline response
         for filename in os.listdir(folder_path):
             full_path = os.path.join(folder_path, filename)
-            res+=(self.getresponse_crowd(full_path))
+            crowd_response = self.getresponse_crowd(full_path)
+            guidelines = self.lookup_guidelines(crowd_response)
+            res+= self.zone_report(guidelines)
         return res
     
     def getresponse_grid(self, folder_path: str):
+        
         grid_analysis = self.grid_analyze_crowd(folder_path)
 
         prompt = (
-            "You are an expert in public safety, crowd behavior, and spatial analysis.\n\n"
-            "You are given a detailed textual report analyzing an image that has been divided into a grid of zones. "
-            "Each zone is labeled using the format 'zone_row_column' (e.g., 'zone_2_3' for row 2, column 3), and contains an AI-generated summary "
-            "of the visual characteristics and estimated crowd density for that specific region. These zone summaries were created using computer vision and language models, "
-            "and describe spatial layout, movement patterns, bottlenecks, and any signs of risk.\n\n"
-            "Below is the full zone-by-zone analysis:\n\n"
+            "You are a specialist in crowd safety, spatial behavior, and public event risk assessment.\n\n"
+            "The data below represents the output of an AI-based crowd analysis system that has divided a crowd image into labeled zones. "
+            "Each zone is identified in 'row_column' format (e.g., '2_3') and includes descriptions of crowd density, behavior, and spatial features.\n\n"
+
+            "Input:\n"
             f"{grid_analysis}\n\n"
-            "Based on this complete spatial and behavioral analysis of the image:\n"
-            "- Provide a concise 100-150 word summary of the overall crowd conditions in the entire scene.\n"
-            "- Identify any zones with dangerously high crowding or indicators of abnormal movement patterns.\n"
-            "- Highlight any patterns across rows or columns that suggest crowd surges, bottlenecks, or unsafe clustering.\n"
-            "- Reference specific zone IDs (e.g., 'zone_1_2') when discussing issues.\n"
-            "- Prioritize accuracy and detail over brevity.\n"
-            "Your goal is to detect early warning signs of potential crowd safety risks using this synthesized zone data."
+
+            "Your task is to produce a detailed diagnostic safety report. Specifically:\n"
+            "1. For **each zone**, provide a thorough safety analysis including:\n"
+            "   - Crowd density level and classification (e.g., sparse, moderate, high, critical).\n"
+            "   - Observed movement behavior (e.g., static, flowing, erratic, bidirectional).\n"
+            "   - Any visible risks (e.g., clustering near exits, compression zones, obstructions, escape route issues).\n"
+            "   - Behavioral anomalies (e.g., unusual gathering, panic movement, restricted flow).\n"
+            "   - Degree of concern: Low / Moderate / High / Critical — and justify it.\n"
+            "2. Then provide a **spatial inference section** that detects:\n"
+            "   - Neighboring zones with correlated risk behavior (e.g., forming pressure corridors or buildup zones).\n"
+            "   - Patterns that could evolve into crowd surges, bottlenecks, or panic conditions.\n"
+            "   - Any directional or multi-zone trends (e.g., crowd flowing diagonally, buildup along a row).\n"
+            "3. Finally, clearly flag any **zones needing immediate intervention** with a label like: [CRITICAL ZONE: 3_2] and explain why.\n\n"
+            "Be extremely detailed, objective, and systematic. Do not summarize. Use clear zone-by-zone headers. This is for operational use by safety managers and emergency planners."
         )
 
         response = self.client.chat.completions.create(
@@ -131,23 +141,21 @@ class CrowdSafetyAgent:
 
         return response.completion_message.content.text
 
-    def summarize_guidelines_response(self, detailed_response: str) -> str:
+    def zone_report(self, detailed_response: str) -> str:
         """
         Takes a longform safety guideline explanation and summarizes it into key takeaways.
         Ideal for alerts or summary sections in a report.
         """
         prompt = (
-            "You are a summarization expert focused on safety and crowd control operations.\n\n"
-            "Given the detailed safety report below, produce a clear, professional summary "
-            "that condenses the findings into 5-10 of the most insightful finds.\n\n"
-            "Your summary should include things such as:\n"
+            "You are an expert focused on safety and crowd control operations.\n\n"
+            "Given the detailed safety report below, extract as much information as possible.\n\n"
+            "Include things such as:\n"
             "- Identify the main safety concern(s)\n"
             "- Highlight any specific zones, behaviors, or anomalies\n"
             "- Recommend key actions, briefly\n"
             "- Indicate the overall risk level (low/moderate/high) if possible\n\n"
             "Be precise and useful. Avoid repeating filler language from the original text.\n\n"
             f"DETAILED SAFETY REPORT:\n{detailed_response}\n\n"
-            "SUMMARY:"
         )
 
         response = self.client.chat.completions.create(

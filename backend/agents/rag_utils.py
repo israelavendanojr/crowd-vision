@@ -37,7 +37,7 @@ def chunk_documents(text, chunk_size=1000, chunk_overlap=200):
         if start >= len(text): break
     return [c for c in chunks if c]
 
-def embed_chunks(chunks, persist_path="data/safety_vector_index"):
+def embed_chunks(chunks, persist_path="backend/data/safety_vector_index"):
     global documents, index
     documents = chunks
     print("Creating embeddings...")
@@ -52,7 +52,7 @@ def embed_chunks(chunks, persist_path="data/safety_vector_index"):
     print(f"Vector store saved with {len(chunks)} chunks")
     return True
 
-def load_vectorstore(persist_path="data/safety_vector_index"):
+def load_vectorstore(persist_path="backend/data/safety_vector_index"):
     global documents, index
     try:
         index = faiss.read_index(f"{persist_path}.index")
