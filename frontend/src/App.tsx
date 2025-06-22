@@ -9,6 +9,7 @@ import { InsightsPanel } from './components/InsightsPanel';
 import { FlagsPanel } from './components/FlagsPanel';
 import { RiskTrendChart } from './components/RiskTrendChart';
 import { HotZonesChart } from './components/HotZonesChart';
+import { RiskLevelPieChart } from './components/RiskLevelPieChart';
 
 const App: React.FC = () => {
   const [currentFrame, setCurrentFrame] = useState(0);
@@ -80,9 +81,9 @@ const App: React.FC = () => {
         
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-          {/* Left Column - Video Player and Frame Analysis */}
-          <div className="lg:col-span-2 bg-gray-700 rounded-lg shadow-lg p-6 border border-gray-600 transition-transform duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-blue-500/50 flex flex-col">
-            <div className="flex-grow-0">
+          {/* Left Column - Video Player */}
+          <div className="lg:col-span-2">
+            <div className="bg-gray-700 rounded-lg shadow-lg p-4 border border-gray-600 transition-transform duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-blue-500/50">
               <VideoPlayer src={currentData.image} frame={currentFrame} total={sampleData.length} />
               <TimelineControls
                 isPlaying={isPlaying}
@@ -96,20 +97,11 @@ const App: React.FC = () => {
                 setFrame={setCurrentFrame}
               />
             </div>
-            {/* Frame Analysis */}
-            <div className="mt-4 pt-4 border-t border-gray-600/50 w-full text-center flex flex-col flex-grow min-h-0">
-              <h3 className="text-base font-medium text-gray-100 mb-3">Frame Analysis</h3>
-              <div className="text-gray-300 leading-relaxed space-y-2 overflow-y-auto pr-2 flex-grow">
-                {currentData.frame_summary ? (
-                  currentData.frame_summary.split('. ').map((sentence, i, arr) => 
-                    sentence ? (
-                      <p key={i} className="w-full">
-                        {sentence.trim()}{i < arr.length - 1 ? '.' : ''}
-                      </p>
-                    ) : null
-                  )
-                ) : "No analysis available for this frame."}
-              </div>
+            
+            {/* Data Visualization Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <RiskTrendChart data={sampleData} currentFrame={currentFrame} />
+              <HotZonesChart data={sampleData} />
             </div>
           </div>
 
@@ -134,19 +126,13 @@ const App: React.FC = () => {
             <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
               <FlagsPanel flags={currentData.flags} />
             </div>
+            {/* <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
+              <RiskLevelPieChart data={sampleData} />
+            </div> */}
           </div>
         </div>
 
-        {/* Data Visualization Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <div className="transition-transform duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-blue-500/50">
-            <RiskTrendChart data={sampleData} currentFrame={currentFrame} />
-          </div>
-          
-          <div className="transition-transform duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-blue-500/50">
-            <HotZonesChart data={sampleData} />
-          </div>
-        </div>
+
       </div>
     </div>
   );
