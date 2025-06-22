@@ -74,10 +74,10 @@ const App: React.FC = () => {
 
 
   return (
-    <div className="h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-6 text-gray-200 overflow-hidden">
-      <div className="max-w-7xl mx-auto h-full flex flex-col">
-        <Header data={currentData} className="flex-shrink-0" />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-6 text-gray-200">
+      <div className="max-w-7xl mx-auto">
+        <Header data={currentData} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           <div className="lg:col-span-2 bg-gray-700 rounded-lg shadow-lg p-6 border border-gray-600 transition-transform duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-blue-500/50 flex flex-col">
             <div className="flex-grow-0">
               <VideoPlayer src={currentData.image} frame={currentFrame} total={sampleData.length} />
@@ -110,7 +110,7 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          <div className="space-y-6 overflow-y-auto pr-1">
+          <div className="space-y-6">
             <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
               <RiskAssessment
                 riskLevel={currentData.risk_level}
