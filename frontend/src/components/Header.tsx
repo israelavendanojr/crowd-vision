@@ -25,10 +25,11 @@ export const Header: React.FC<{ data: CrowdData; className?: string }> = ({ data
 
   return (
     <div className={`mb-6 ${className}`}>
-      <div className="flex items-end gap-4 mb-2">
+      <div className="mb-2">
         <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
           CrowdVision
         </h1>
+        <p className="text-sm text-gray-400 mt-1">AI Crowd Safety Analysis Tool</p>
       </div>
       <div className="flex items-center gap-4">
         <div className={`px-3 py-1 rounded-full text-sm font-semibold ${getRiskColor(data.risk_level)}`}>
