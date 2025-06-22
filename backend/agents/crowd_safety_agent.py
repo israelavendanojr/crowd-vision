@@ -201,52 +201,56 @@ class CrowdSafetyAgent:
 
         return response.completion_message.content.text
 
-    def summarize_frame_as_json(self, folder_path: str, timestamp: str = None) -> dict:
+    def summarize_frame_as_json(self, folder_path: str, timestamp: str = None):
         """
         Generates a complete JSON summary of a frame for frontend display.
         """
-        # 1. Get frame-level summary and policy analysis
+        # 1. Frame metadata
         summary = self.getresponse_grid(folder_path)
         guidelines = self.lookup_guidelines(summary)
 
-        # 2. Prompt LLM to convert to JSON
+        frame_id = os.path.basename(os.path.dirname(folder_path))
+
+        # 2. Prompt to LLM
         prompt = (
             f"You are a safety analytics agent generating JSON for a crowd monitoring dashboard.\n"
-            f"Using both the visual analysis of the scene and the safety policy reasoning below, generate a structured JSON with these fields:\n\n"
+            f"Using both the visual analysis and the safety policy reasoning below, generate a structured JSON with these fields:\n\n"
             f"FRAME VISUAL ANALYSIS:\n{summary}\n\n"
             f"SAFETY POLICY ANALYSIS:\n{guidelines}\n\n"
             f"- risk_level (High/Medium/Low)\n"
             f"- risk_trend (Stable/Increasing/Decreasing — infer from context)\n"
-            f"- text_summary (a high-level 3–5 sentence analysis of the situation in clinical tone)\n"
-            f"- hot_zones (list of zone IDs showing danger, should only include the IDs, i.e., ['0_0', '0_1'])\n"
-            f"- insights (list of short safety observations, i.e., crowd crush risk, exit blockage, security deployment needed)\n"
-            f"- flags (list of bold alert strings, i.e., EMERGENCY CROWD - CRUSH RISK, HIGH DENSITY)\n"
-            f"- protocol (summary of recommended response strategy from the safety guidelines)\n\n"
+            f"- hot_zones (list of zone IDs in format 'Zone 1_2', not just '1_2')\n"
+            f"- insights (string of comma-separated safety observations)\n"
+            f"- flags (list of bold alert strings like EMERGENCY CROWD - CRUSH RISK)\n"
+            f"- protocol (summary of recommended response strategy)\n"
+            f"- summary (3–5 sentence analysis of the situation in clinical tone)\n\n"
             f"Respond ONLY in raw JSON. DO NOT include code blocks or explanations. Example:\n"
-            f'{{"risk_level": "High", "risk_trend": "Stable", "hot_zones": [...], "insights": [...], "flags": [...], "protocol": "...", ...}}'
+            f'{{"risk_level": "High", "risk_trend": "Stable", "hot_zones": ["Zone 1_2"], "insights": "...", "flags": [...], "protocol": "...", "summary": "...", ...}}'
         )
 
-        # 3. Get LLM output
+        # 3. Call LLM
         response = self.client.chat.completions.create(
             model="Llama-4-Maverick-17B-128E-Instruct-FP8",
             messages=[{"role": "user", "content": prompt}],
         )
-
         raw_output = response.completion_message.content.text
-        print("LLM RAW OUTPUT:\n", raw_output)
 
-        # 4. Strip triple backticks if they exist
+        # 4. Cleanup
         cleaned_output = re.sub(r"^```(?:json)?\s*|```$", "", raw_output.strip(), flags=re.MULTILINE).strip()
-
         try:
             json_response = json.loads(cleaned_output)
         except json.JSONDecodeError as e:
             print("JSON parse error:", e)
             return {"error": "Invalid JSON from LLM"}
 
-        # 5. Inject any extra metadata
-        json_response["timestamp"] = timestamp
-        json_response["rag_summary"] = guidelines
+        # 5. Inject required metadata
+        json_response["id"] = frame_id
+        json_response["time_stamp"] = timestamp or "unknown"
+        json_response["frame_summary"] = json_response.get("summary", "")
+        json_response["image"] = "./backend/data/test_video_4k.mp4"
+
+        # 6. Fix zone formatting if necessary
+        if "hot_zones" in json_response:
+            json_response["hot_zones"] = [f"Zone {z}" if not z.startswith("Zone ") else z for z in json_response["hot_zones"]]
 
         return json_response
-    
