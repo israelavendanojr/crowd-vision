@@ -130,3 +130,29 @@ class CrowdSafetyAgent:
         )
 
         return response.completion_message.content.text
+
+    def summarize_guidelines_response(self, detailed_response: str) -> str:
+        """
+        Takes a longform safety guideline explanation and summarizes it into key takeaways.
+        Ideal for alerts or summary sections in a report.
+        """
+        prompt = (
+            "You are a summarization expert focused on safety and crowd control operations.\n\n"
+            "Given the detailed safety report below, produce a clear, professional summary "
+            "that condenses the findings into 5-10 of the most insightful finds.\n\n"
+            "Your summary should include things such as:\n"
+            "- Identify the main safety concern(s)\n"
+            "- Highlight any specific zones, behaviors, or anomalies\n"
+            "- Recommend key actions, briefly\n"
+            "- Indicate the overall risk level (low/moderate/high) if possible\n\n"
+            "Be precise and useful. Avoid repeating filler language from the original text.\n\n"
+            f"DETAILED SAFETY REPORT:\n{detailed_response}\n\n"
+            "SUMMARY:"
+        )
+
+        response = self.client.chat.completions.create(
+            model="Llama-4-Maverick-17B-128E-Instruct-FP8",
+            messages=[{"role": "user", "content": prompt}],
+        )
+
+        return response.completion_message.content.text
