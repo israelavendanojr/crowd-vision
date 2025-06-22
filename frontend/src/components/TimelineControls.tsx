@@ -18,13 +18,13 @@ export const TimelineControls: React.FC<Props> = ({
 }) => (
   <div className="space-y-4">
     <div className="flex items-center gap-4">
-      <button onClick={onPrev} className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-gray-300">
+      <button onClick={onPrev} className="p-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-gray-300">
         <SkipBack className="w-5 h-5" />
       </button>
-      <button onClick={onToggle} className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
+      <button onClick={onToggle} className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg">
         {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
       </button>
-      <button onClick={onNext} className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-gray-300">
+      <button onClick={onNext} className="p-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-gray-300">
         <SkipForward className="w-5 h-5" />
       </button>
       <div className="flex items-center gap-2">
@@ -32,7 +32,7 @@ export const TimelineControls: React.FC<Props> = ({
         <select
           value={speed}
           onChange={(e) => setSpeed(Number(e.target.value))}
-          className="px-2 py-1 border border-gray-700 rounded text-sm bg-gray-800 text-gray-300"
+          className="px-2 py-1 border border-gray-600 rounded text-sm bg-gray-600 text-gray-300"
         >
           {[0.5, 1, 2, 4].map(s => <option key={s} value={s}>{s}x</option>)}
         </select>
@@ -45,11 +45,11 @@ export const TimelineControls: React.FC<Props> = ({
         max={totalFrames - 1}
         value={currentFrame}
         onChange={(e) => setFrame(Number(e.target.value))}
-        className="w-full h-2 bg-gray-700 rounded-lg"
+        className="w-full h-2 bg-gray-600 rounded-lg"
       />
       <div className="flex justify-between text-xs text-gray-500 mt-1">
-        <span className="text-gray-400">Start</span>
-        <span className="text-gray-400">End</span>
+        <span className="text-gray-300">Start</span>
+        <span className="text-gray-300">End</span>
       </div>
     </div>
   </div>

@@ -8,8 +8,8 @@ interface Props {
 }
 
 export const RiskAssessment: React.FC<Props> = ({ riskLevel, riskTrend, summary }) => (
-  <div className="bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-700">
-    <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
+  <div className="bg-gray-700 rounded-lg shadow-lg p-6 border border-gray-600">
+    <h3 className="text-lg font-semibold text-gray-200 mb-4 flex items-center gap-2">
       <AlertTriangle className="w-5 h-5 text-yellow-400" />
       Risk Assessment
     </h3>
@@ -19,7 +19,7 @@ export const RiskAssessment: React.FC<Props> = ({ riskLevel, riskTrend, summary 
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="text-center p-3 bg-blue-900 rounded-lg">
-          <div className="text-lg font-bold text-blue-300">{riskLevel}</div>
+          <div className="text-lg font-bold text-blue-400">{riskLevel}</div>
           <div className="text-xs text-gray-300">Risk Level</div>
         </div>
         <div className="text-center p-3 bg-gray-700 rounded-lg">

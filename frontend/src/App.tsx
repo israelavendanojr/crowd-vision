@@ -65,11 +65,11 @@ const App: React.FC = () => {
   }, [isPlaying, playbackSpeed]);
 
   return (
-    <div className="min-h-screen bg-gray-950 dark:bg-gray-950 p-6 text-gray-100 dark:text-gray-100">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-6 text-gray-200">
       <div className="max-w-7xl mx-auto">
         <Header data={currentData} />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-gray-800 dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-700">
+            <div className="lg:col-span-2 bg-gray-700 rounded-lg shadow-lg p-6 border border-gray-600">
             <VideoPlayer src={currentData.image} frame={currentFrame} total={sampleData.length} />
             <TimelineControls
               isPlaying={isPlaying}
