@@ -4,11 +4,15 @@ from rag_utils import load_vectorstore, search_similar_chunks
 import os
 import base64
 import re
+<<<<<<< Updated upstream
 from vision_language_tool import VisionLanguageTool
 import json
 
 
 
+=======
+from concurrent.futures import ThreadPoolExecutor
+>>>>>>> Stashed changes
 
 class CrowdSafetyAgent:
     def __init__(self):
@@ -64,14 +68,28 @@ class CrowdSafetyAgent:
         res = adjust_detections_to_global(result,zone_offsets)
         
         return res
+<<<<<<< Updated upstream
     
     # def grid_analyze_crowd(self, folder_path: str) -> str:
     #     """Each Frame is already turned into individual zones, each zone is labeled zone_row_column.png,
     #        We are going to iterate through all the zone images and analyze the density in each and add it all together
+=======
+
+
+    def process_zone(self, full_path):
+        crowd_response = self.getresponse_crowd(full_path)
+        guidelines = self.lookup_guidelines(crowd_response)
+        return self.zone_report(guidelines)
+
+    def grid_analyze_crowd(self, folder_path: str) -> str:
+        """Each Frame is already turned into individual zones, each zone is labeled zone_row_column.png,
+           We are going to iterate through all the zone images and analyze the density in each and add it all together
+>>>>>>> Stashed changes
 
     #     Args:
     #         folderpath (str): Folder containing zone images
 
+<<<<<<< Updated upstream
     #     Returns:
     #         str: description of each folder
     #     """
@@ -84,6 +102,21 @@ class CrowdSafetyAgent:
     #         guidelines = self.lookup_guidelines(crowd_response)
     #         res+= self.zone_report(guidelines)
     #     return res
+=======
+        Returns:
+            str: description of each folder
+        """
+        res = ""
+        # 8 MAX WORKERS is the fastest Speed
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            futures = []
+            for filename in os.listdir(folder_path):
+                full_path = os.path.join(folder_path, filename)
+                futures.append(executor.submit(self.process_zone, full_path))
+            for future in futures:
+                res += future.result()
+        return res
+>>>>>>> Stashed changes
     
     # def getresponse_grid(self, folder_path: str):
         
@@ -110,6 +143,7 @@ class CrowdSafetyAgent:
     
     # def getresponse_crowd(self, image_path: str) -> str:
         
+<<<<<<< Updated upstream
     #     crowd_summary = self._analyze_crowd_density(image_path)  
     #     zone_match = re.search(r'zone_(\d+_\d+)', image_path)
     #     zone_label = zone_match.group(1) if zone_match else "UNKNOWN_ZONE"
@@ -123,6 +157,26 @@ class CrowdSafetyAgent:
     #         f"ZONE {zone_label} COMPUTER VISION DATA:\n{crowd_summary}\n\n"
     #         f"Reference zone {zone_label} throughout for spatial correlation with adjacent zones."
     #     )
+=======
+        crowd_summary = self._analyze_crowd_density(image_path)  
+        zone_match = re.search(r'zone_(\d+_\d+)', image_path)
+        zone_label = zone_match.group(1) if zone_match else "UNKNOWN_ZONE"
+        
+        scene_description = "#The image presents an aerial view of a bustling night market, characterized by a grid-like layout of stalls and vendors. The scene is illuminated by a multitude of lights, creating a vibrant and dynamic atmosphere. Key Features: Grid Layout: The market is organized into a grid pattern, with rows and columns of stalls and vendors. Crowd Density: The area is densely populated, with a large number of people visible throughout the market.Lighting: The scene is brightly lit, with a variety of light sources, including overhead lighting, stall lights, and possibly streetlights.Stall Variety: The stalls appear to be diverse, with different colors, shapes, and sizes, suggesting a range of products and services being offered. Motorcycles: Many motorcycles are parked throughout the market, indicating that they are a common mode of transportation for attendees. Basketball Courts: Two basketball courts are visible on the right side of the image, suggesting that the market is located in a public park or recreational area. Visual Cues: The image is taken from directly above, providing a bird's-eye view of the market. The lighting is predominantly artificial, with a warm orange glow emanating from the left side of the image. The crowd is densely packed, with people visible in every direction. The stalls and vendors are arranged in a seemingly organized manner, with clear pathways between them. Relevant Information for Llama: The image suggests a high level of activity and energy, with a large crowd and a variety of vendors and stalls. The grid layout and organized arrangement of stalls imply a well-planned and managed event. The presence of motorcycles and basketball courts provides context about the surrounding environment and the demographics of the attendees. The image could be used to analyze crowd behavior, vendor distribution, and market dynamics, among other aspects.By examining this image, Llama can gain insights into the characteristics of a night market, including its layout, crowd density, and vendor diversity. This information can be used to inform reasoning about the features encoded in a video feed that looks like this, such as object detection, crowd tracking, and scene understanding"
+        
+        prompt = (
+            f"Analyze surveillance data for zone {zone_label} from computer vision crowd monitoring. "
+            f"This scene is part of a larger environment described as: {scene_description}\n\n"
+            f"Provide a comprehensive description including: "
+            f"1) Spatial layout and infrastructure, 2) Precise crowd density (people/m²) and distribution patterns, 3) Movement flows and directional conflicts, "
+            f"4) Crowd clustering and social organization, 5) Bottlenecks and movement restrictions, 6) Behavioral indicators and anomalies, "
+            f"7) Safety risk indicators and stability assessment, 8) Temporal dynamics and trend analysis. "
+            f"Write 200–300 words with clinical precision for integration with other zone analyses.\n\n"
+            f"ZONE {zone_label} COMPUTER VISION DATA:\n{crowd_summary}\n\n"
+            f"Reference zone {zone_label} throughout for spatial correlation with adjacent zones."
+        )
+
+>>>>>>> Stashed changes
         
     #     response = self.client.chat.completions.create(
     #         model="Llama-4-Maverick-17B-128E-Instruct-FP8",
