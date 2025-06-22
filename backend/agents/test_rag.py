@@ -11,9 +11,17 @@ def main():
         print("loading Roboflow workspace...")
         agent = CrowdSafetyAgent()
 
+
+        test_image_path = "backend/data/folderwork/frame_0000_0ms/zones/zone_0_0.png"
+
+        # print("\n=== Scene Description using Crowd Density")
+        # full_description = agent.getresponse_grid("backend/data/folderwork/frame_0000_0ms/zones")
+        image_description = agent._analyze_crowd_density(test_image_path)
+        print(image_description)
+
         print("\n=== Testing RAG Guideline Lookup ===")
-        test_situation = "There is a large crowd moving quickly toward the exit with limited space available."
-        result = agent.lookup_guidelines(test_situation)
+        # test_situation = "Sudden loud noises caused people to start running toward the venue perimeter, creating panic."
+        result = agent.lookup_guidelines(image_description)
         print("\nResponse from LLaMA:\n")
         print(result)
 
