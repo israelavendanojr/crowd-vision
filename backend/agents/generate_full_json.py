@@ -22,8 +22,6 @@ def main():
     frame_folders = get_all_frame_folders(base_folder)
 
     for i, frame_path in enumerate(frame_folders):
-        if i % 3 != 0: 
-            continue
 
         print(f"Processing frame {i}: {frame_path}")
 

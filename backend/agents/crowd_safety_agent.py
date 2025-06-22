@@ -217,6 +217,7 @@ class CrowdSafetyAgent:
             f"SAFETY POLICY ANALYSIS:\n{guidelines}\n\n"
             f"- risk_level (High/Medium/Low)\n"
             f"- risk_trend (Stable/Increasing/Decreasing — infer from context)\n"
+            f"- text_summary (a high-level 3–5 sentence analysis of the situation in clinical tone)\n"
             f"- hot_zones (list of zone IDs showing danger, should only include the IDs, i.e., ['0_0', '0_1'])\n"
             f"- insights (list of short safety observations, i.e., crowd crush risk, exit blockage, security deployment needed)\n"
             f"- flags (list of bold alert strings, i.e., EMERGENCY CROWD - CRUSH RISK, HIGH DENSITY)\n"
