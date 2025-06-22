@@ -27,7 +27,7 @@ export const sampleData: ExtendedCrowdData[] = [
   },
   {
     "id": 'frame_0001_1200ms',
-    risk_level: "High",
+    risk_level: "Medium",
     risk_trend: "Increasing",
     hot_zones: [
       "Zone 1_2",
@@ -48,7 +48,7 @@ export const sampleData: ExtendedCrowdData[] = [
   },
   {
     "id": 'frame_0002_2400ms',
-    risk_level: "High",
+    risk_level: "Low",
     risk_trend: "Increasing",
     hot_zones: [
       "0_2",
@@ -69,7 +69,7 @@ export const sampleData: ExtendedCrowdData[] = [
   },
   {
     id: 'frame_0003_3600ms',
-    risk_level: "High",
+    risk_level: "Medium",
     risk_trend: "Increasing",
     hot_zones: [
       "1_1",
@@ -89,7 +89,7 @@ export const sampleData: ExtendedCrowdData[] = [
   },
   {
     id: 'frame_0004_4800ms',
-    risk_level: "High",
+    risk_level: "Medium",
     risk_trend: "Increasing",
     hot_zones: [
       "1_2",
@@ -133,7 +133,7 @@ export const sampleData: ExtendedCrowdData[] = [
   },
   {
     id: 'frame_0006_7200ms',
-    risk_level: "High",
+    risk_level: "Medium",
     risk_trend: "Increasing",
     hot_zones: [
       "0_2",
@@ -154,7 +154,7 @@ export const sampleData: ExtendedCrowdData[] = [
   },
   {
     id: 'frame_0007_8400ms',
-    risk_level: "High",
+    risk_level: "Medium",
     risk_trend: "Increasing",
     hot_zones: [
       "1_0",
@@ -175,7 +175,7 @@ export const sampleData: ExtendedCrowdData[] = [
   {
     id: 'frame_0008_9600ms',
     risk_level: "High",
-    risk_trend: "Increasing",
+    risk_trend: "Steady",
     hot_zones: [
       "0_0",
       "0_1",
@@ -219,7 +219,7 @@ export const sampleData: ExtendedCrowdData[] = [
   {
     id: 'frame_0010_12000ms',
     risk_level: "High",
-    risk_trend: "Increasing",
+    risk_trend: "Steady",
     hot_zones: [
       "0_0",
       "1_1",
@@ -239,7 +239,7 @@ export const sampleData: ExtendedCrowdData[] = [
   {
     id: 'frame_0011_13200ms',
     risk_level: "High",
-    risk_trend: "Increasing",
+    risk_trend: "Decreasing",
     hot_zones: [
       "0_2",
       "1_2",
@@ -260,8 +260,8 @@ export const sampleData: ExtendedCrowdData[] = [
   },
   {
     id: 'frame_0012_14400ms',
-    risk_level: "High",
-    risk_trend: "Increasing",
+    risk_level: "Medium",
+    risk_trend: "Steady",
     hot_zones: [
       "0_1",
       "1_1",
@@ -281,8 +281,8 @@ export const sampleData: ExtendedCrowdData[] = [
   },
   {
     id: 'frame_0013_15600ms',
-    risk_level: "High",
-    risk_trend: "Increasing",
+    risk_level: "Medium",
+    risk_trend: "Steady",
     hot_zones: [
       "0_1",
       "2_0",
@@ -302,8 +302,8 @@ export const sampleData: ExtendedCrowdData[] = [
   },
   {
     id: 'frame_0014_16800ms',
-    risk_level: "High",
-    risk_trend: "Increasing",
+    risk_level: "Medium",
+    risk_trend: "Steady",
     hot_zones: [
       "Zone 0_0",
       "Zone 0_1",
@@ -322,8 +322,8 @@ export const sampleData: ExtendedCrowdData[] = [
   },
     {
     id: 'frame_0015_18000ms',
-    risk_level: "High",
-    risk_trend: "Increasing",
+    risk_level: "Medium",
+    risk_trend: "Decreasing",
     hot_zones: [
       "1_3"
     ],
@@ -340,8 +340,8 @@ export const sampleData: ExtendedCrowdData[] = [
   },
   {
     id: 'frame_0016_19200ms',
-    risk_level: "High",
-    risk_trend: "Increasing",
+    risk_level: "Low",
+    risk_trend: "Steady",
     hot_zones: [
       "0_3",
       "1_0",
@@ -362,8 +362,8 @@ export const sampleData: ExtendedCrowdData[] = [
   },
   {
     id: 'frame_0017_20400ms',
-    risk_level: "High",
-    risk_trend: "Increasing",
+    risk_level: "Low",
+    risk_trend: "Steady",
     hot_zones: [
       "1_1",
       "2_1"
@@ -381,7 +381,7 @@ export const sampleData: ExtendedCrowdData[] = [
   },
   {
     id: 'frame_0018_21600ms',
-    risk_level: "High",
+    risk_level: "Low",
     risk_trend: "Increasing",
     hot_zones: [
       "0_0",
@@ -401,7 +401,7 @@ export const sampleData: ExtendedCrowdData[] = [
   },
   {
     id: 'frame_0019_22800ms',
-    risk_level: "High",
+    risk_level: "Medium",
     risk_trend: "Increasing",
     hot_zones: [
       "1_2",
@@ -423,7 +423,7 @@ export const sampleData: ExtendedCrowdData[] = [
   },
   {
     id: 'frame_0020_24000ms',
-    risk_level: "High",
+    risk_level: "Medium",
     risk_trend: "Increasing",
     hot_zones: [
       "0_2"
@@ -441,7 +441,7 @@ export const sampleData: ExtendedCrowdData[] = [
   },
   {
     id: 'frame_0021_25200ms',
-    risk_level: "High",
+    risk_level: "Medium",
     risk_trend: "Increasing",
     hot_zones: [
       "1_1",
@@ -463,7 +463,7 @@ export const sampleData: ExtendedCrowdData[] = [
   },
   {
     id: 'frame_0022_26400ms',
-    risk_level: "High",
+    risk_level: "Medium",
     risk_trend: "Increasing",
     hot_zones: [
       "1_0",
@@ -485,7 +485,7 @@ export const sampleData: ExtendedCrowdData[] = [
   },
   {
     id: 'frame_0023_27600ms',
-    risk_level: "High",
+    risk_level: "Medium",
     risk_trend: "Increasing",
     hot_zones: [
       "0_1",
