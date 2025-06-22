@@ -24,7 +24,11 @@ const App: React.FC = () => {
   };
 
   // Parse time_stamps to seconds (relative to video start)
-  const frameTimes = sampleData.map(d => new Date(d.time_stamp).getTime() / 1000);
+  function parseTimeString(str: string) {
+    const [min, sec] = str.split(':').map(Number);
+    return min * 60 + sec;
+  }
+  const frameTimes = sampleData.map(d => parseTimeString(d.time_stamp));
   const videoStart = frameTimes[0];
   const relativeFrameTimes = frameTimes.map(t => t - videoStart);
 

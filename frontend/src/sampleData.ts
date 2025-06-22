@@ -1,5 +1,6 @@
 export const sampleData: ExtendedCrowdData[] = [
   {
+    id: 'frame_0000_0ms',
     risk_level: "High",
     risk_trend: "Increasing",
     hot_zones: [
@@ -13,7 +14,7 @@ export const sampleData: ExtendedCrowdData[] = [
       "3_0",
       "3_2",
     ],
-    time_stamp: "2024-06-21T14:30:00.000Z",
+    time_stamp: "0:00",
     image: "./backend/data/test_video_4k.mp4",
     summary: "The overall threat assessment indicates a high level of risk across multiple zones due to high crowd densities and potential bottlenecks. Immediate action is required to mitigate these risks, including crowd dispersal measures, enhanced surveillance, and deployment of additional security personnel. A comprehensive review of event planning and site layout is necessary to prevent similar risks in future events.",
     insights: "Crowd crush risk, Exit blockage, Security deployment needed",
@@ -25,6 +26,7 @@ export const sampleData: ExtendedCrowdData[] = [
     frame_summary: "The overall threat assessment indicates a high level of risk across multiple zones due to high crowd densities and potential bottlenecks. Immediate action is required to mitigate these risks, including crowd dispersal measures, enhanced surveillance, and deployment of additional security personnel. A comprehensive review of event planning and site layout is necessary to prevent similar risks in future events.",
   },
   {
+    id: 'frame_0001_1200ms',
     risk_level: "High",
     risk_trend: "Increasing",
     hot_zones: [
@@ -33,7 +35,7 @@ export const sampleData: ExtendedCrowdData[] = [
       "Zone 3_0",
       "Zone 3_2",
     ],
-    time_stamp: "2024-06-21T14:30:00.001Z",
+    time_stamp: "0:01",
     image: "./backend/data/test_video_4k.mp4",
     summary: "The overall threat assessment indicates a high level of risk due to overcrowding and poor crowd distribution across multiple zones. Immediate intervention is required to manage crowd density, improve infrastructure, and enhance emergency response planning. Continuous monitoring and adaptive management strategies are crucial to mitigate risks and ensure a safe environment for attendees. Several zones exhibit crowd densities significantly higher than recommended limits.",
     insights: "Crowd crush risk in Zone 1_2 and Zone 2_0, Exit blockage risk due to high crowd density, Security deployment needed in high-risk zones, Inadequate sanitary provision in Zone 0_1",
@@ -45,6 +47,7 @@ export const sampleData: ExtendedCrowdData[] = [
     frame_summary: "The overall threat assessment indicates a high level of risk due to overcrowding and poor crowd distribution across multiple zones. Immediate intervention is required to manage crowd density, improve infrastructure, and enhance emergency response planning. Continuous monitoring and adaptive management strategies are crucial to mitigate risks and ensure a safe environment for attendees. Several zones exhibit crowd densities significantly higher than recommended limits.",
   },
   {
+    id: 'frame_0002_2400ms',
     risk_level: "High",
     risk_trend: "Increasing",
     hot_zones: [
@@ -53,7 +56,7 @@ export const sampleData: ExtendedCrowdData[] = [
       "1_3",
       "3_2",
     ],
-    time_stamp: "2024-06-21T14:30:00.002Z",
+    time_stamp: "0:02",
     image: "./backend/data/test_video_4k.mp4",
     summary: "The night market event is experiencing high crowd densities in several zones, exceeding recommended limits and posing a high risk of crowd-related incidents. Continuous monitoring and crowd management are necessary to mitigate these risks. Potential bottlenecks and directional conflicts have been identified in multiple zones. Emergency response planning and staff training are also crucial to ensure a safe and enjoyable experience for attendees. The overall threat assessment is Moderate to High.",
     insights: "Crowd crush risk in Zones 0_2, 0_3, 1_3, and 3_2, Potential bottlenecks in Zones 2_1, 2_3, and 3_1, Inadequate crowd management in several zones, Insufficient emergency response planning",
@@ -65,6 +68,7 @@ export const sampleData: ExtendedCrowdData[] = [
     frame_summary: "The night market event is experiencing high crowd densities in several zones, exceeding recommended limits and posing a high risk of crowd-related incidents. Continuous monitoring and crowd management are necessary to mitigate these risks. Potential bottlenecks and directional conflicts have been identified in multiple zones. Emergency response planning and staff training are also crucial to ensure a safe and enjoyable experience for attendees. The overall threat assessment is Moderate to High.",
   },
   {
+    id: 'frame_0003_3600ms',
     risk_level: "High",
     risk_trend: "Increasing",
     hot_zones: [
@@ -72,7 +76,7 @@ export const sampleData: ExtendedCrowdData[] = [
       "1_2",
       "1_3",
     ],
-    time_stamp: "2024-06-21T14:30:00.003Z",
+    time_stamp: "0:03",
     image: "./backend/data/test_video_4k.mp4",
     summary: "The crowd situation indicates a high risk level due to overcrowding in Zone 1_1 and moderate to high densities in several other zones. Potential risks include crowd crush, bottlenecks, and directional conflicts. Immediate action is required to manage crowd density and prevent safety incidents. Enhanced monitoring and crowd management strategies are necessary. The situation is being closely monitored.",
     insights: "Crowd crush risk in Zone 1_1, Potential bottlenecks in Zones 1_2 and 1_3, Need for enhanced security deployment",
@@ -84,6 +88,7 @@ export const sampleData: ExtendedCrowdData[] = [
     frame_summary: "The crowd situation indicates a high risk level due to overcrowding in Zone 1_1 and moderate to high densities in several other zones. Potential risks include crowd crush, bottlenecks, and directional conflicts. Immediate action is required to manage crowd density and prevent safety incidents. Enhanced monitoring and crowd management strategies are necessary. The situation is being closely monitored.",
   },
   {
+    id: 'frame_0004_4800ms',
     risk_level: "High",
     risk_trend: "Increasing",
     hot_zones: [
@@ -91,7 +96,7 @@ export const sampleData: ExtendedCrowdData[] = [
       "2_0",
       "2_2",
     ],
-    time_stamp: "2024-06-21T14:30:00.004Z",
+    time_stamp: "0:05",
     image: "./backend/data/test_video_4k.mp4",
     summary: "The crowd situation is critical with high densities in zones 1_2, 2_0, and 2_2, posing significant safety risks. Several zones are at or beyond recommended risk thresholds for crowd density and movement patterns. The overall risk level is high due to overcrowding, inadequate emergency planning, and insufficient crowd management. Immediate interventions are required to mitigate these risks. The situation is being closely monitored.",
     insights: "Crowd crush risk in zone 1_2, Exit blockage potential in zones with complex layouts, Security deployment needed in high-risk zones",
@@ -103,6 +108,7 @@ export const sampleData: ExtendedCrowdData[] = [
     frame_summary: "The crowd situation is critical with high densities in zones 1_2, 2_0, and 2_2, posing significant safety risks. Several zones are at or beyond recommended risk thresholds for crowd density and movement patterns. The overall risk level is high due to overcrowding, inadequate emergency planning, and insufficient crowd management. Immediate interventions are required to mitigate these risks. The situation is being closely monitored.",
   },
   {
+    id: 'frame_0005_6000ms',
     risk_level: "High",
     risk_trend: "Increasing",
     hot_zones: [
@@ -114,7 +120,7 @@ export const sampleData: ExtendedCrowdData[] = [
       "2_3",
       "3_3",
     ],
-    time_stamp: "2024-06-21T14:30:00.006Z",
+    time_stamp: "0:06",
     image: "./backend/data/test_video_4k.mp4",
     summary: "The overall threat assessment indicates a high level of risk across multiple zones due to overcrowding and potential bottlenecks. Immediate interventions are required in high-risk zones to prevent crowd disasters. Continuous monitoring and crowd management strategies are essential across all zones. High crowd densities in adjacent zones can lead to cascade risks.",
     insights: "Crowd crush risk in zones 0_2, 1_2, 2_0, 2_2, 2_3, 3_3, Exit blockage potential in zones 1_2, 2_2, Security deployment needed in zones 1_2, 2_0, 2_1, 2_2, 2_3",
@@ -126,6 +132,7 @@ export const sampleData: ExtendedCrowdData[] = [
     frame_summary: "The overall threat assessment indicates a high level of risk across multiple zones due to overcrowding and potential bottlenecks. Immediate interventions are required in high-risk zones to prevent crowd disasters. Continuous monitoring and crowd management strategies are essential across all zones. High crowd densities in adjacent zones can lead to cascade risks.",
   },
   {
+    id: 'frame_0006_7200ms',
     risk_level: "High",
     risk_trend: "Increasing",
     hot_zones: [
@@ -134,7 +141,7 @@ export const sampleData: ExtendedCrowdData[] = [
       "1_2",
       "2_1",
     ],
-    time_stamp: "2024-06-21T14:30:00.007Z",
+    time_stamp: "0:07",
     image: "./backend/data/test_video_4k.mp4",
     summary: "The overall threat assessment indicates a high risk level across the event area due to overcrowding, crowd pressure, and potential bottlenecks in multiple zones. Continuous monitoring and crowd management are critical. Several zones exceed recommended crowd density thresholds, violating safety guidelines. Emergency response planning and training are essential to mitigate these risks.",
     insights: "Crowd crush risk in zones 0_2, 1_1, 1_2, Exit blockage potential in zones 2_0, 3_0, Security deployment needed in high-risk zones",
@@ -146,6 +153,7 @@ export const sampleData: ExtendedCrowdData[] = [
     frame_summary: "The overall threat assessment indicates a high risk level across the event area due to overcrowding, crowd pressure, and potential bottlenecks in multiple zones. Continuous monitoring and crowd management are critical. Several zones exceed recommended crowd density thresholds, violating safety guidelines. Emergency response planning and training are essential to mitigate these risks.",
   },
   {
+    id: 'frame_0007_8400ms',
     risk_level: "High",
     risk_trend: "Increasing",
     hot_zones: [
@@ -153,7 +161,7 @@ export const sampleData: ExtendedCrowdData[] = [
       "2_0",
       "2_3",
     ],
-    time_stamp: "2024-06-21T14:30:00.008Z",
+    time_stamp: "0:08",
     image: "./backend/data/test_video_4k.mp4",
     summary: "The crowd density in several zones exceeds recommended limits, posing a high risk to safety. Zones 1_0, 2_0, and 2_3 are of particular concern. Immediate intervention is required to mitigate potential safety risks. Moderate-risk zones require continuous monitoring and preparedness for intervention. Crowd control measures and enhanced surveillance are recommended.",
     insights: "Crowd crush risk in Zones 1_0, 2_0, and 2_3, Potential exit blockage in high-density zones, Security deployment needed in Zones 1_0, 2_0, and 2_3",
@@ -165,6 +173,7 @@ export const sampleData: ExtendedCrowdData[] = [
     frame_summary: "The crowd density in several zones exceeds recommended limits, posing a high risk to safety. Zones 1_0, 2_0, and 2_3 are of particular concern. Immediate intervention is required to mitigate potential safety risks. Moderate-risk zones require continuous monitoring and preparedness for intervention. Crowd control measures and enhanced surveillance are recommended.",
   },
   {
+    id: 'frame_0008_9600ms',
     risk_level: "High",
     risk_trend: "Increasing",
     hot_zones: [
@@ -175,7 +184,7 @@ export const sampleData: ExtendedCrowdData[] = [
       "3_2",
       "3_3",
     ],
-    time_stamp: "2024-06-21T14:30:00.009Z",
+    time_stamp: "0:10",
     image: "./backend/data/test_video_4k.mp4",
     summary: "The overall threat assessment indicates a high risk of overcrowding and crowd disasters in multiple zones. Immediate intervention is required to manage crowd densities, prevent bottlenecks, and ensure safe escape routes. Continuous monitoring and coordination between zones are essential to mitigate risks and prevent a cascade of emergencies. High crowd densities are observed in zones 0_0, 0_1, 1_3, 2_0, 3_2, and 3_3.",
     insights: "Crowd crush risk, Exit blockage, Security deployment needed",
@@ -187,6 +196,7 @@ export const sampleData: ExtendedCrowdData[] = [
     frame_summary: "The overall threat assessment indicates a high risk of overcrowding and crowd disasters in multiple zones. Immediate intervention is required to manage crowd densities, prevent bottlenecks, and ensure safe escape routes. Continuous monitoring and coordination between zones are essential to mitigate risks and prevent a cascade of emergencies. High crowd densities are observed in zones 0_0, 0_1, 1_3, 2_0, 3_2, and 3_3.",
   },
   {
+    id: 'frame_0009_10800ms',
     risk_level: "High",
     risk_trend: "Increasing",
     hot_zones: [
@@ -195,7 +205,7 @@ export const sampleData: ExtendedCrowdData[] = [
       "2_1",
       "3_1",
     ],
-    time_stamp: "2024-06-21T14:30:00.010Z",
+    time_stamp: "0:11",
     image: "./backend/data/test_video_4k.mp4",
     summary: "The overall risk assessment indicates a high likelihood of crowd-related incidents due to extremely high densities in Zones 1_0 and 1_3, and moderate to high densities in other zones. Immediate intervention is required to manage crowd density and enhance surveillance. Emergency response plans should be activated, and additional security personnel deployed to high-risk areas. Continuous monitoring of crowd movement and density is crucial to prevent overcrowding and potential bottlenecks.",
     insights: "Crowd crush risk in Zones 1_0 and 1_3, Potential bottlenecks in Zones 2_1 and 3_1, Need for enhanced surveillance and security deployment, Risk of directional conflicts in Zones 0_1 and 3_3",
@@ -207,6 +217,7 @@ export const sampleData: ExtendedCrowdData[] = [
     frame_summary: "The overall risk assessment indicates a high likelihood of crowd-related incidents due to extremely high densities in Zones 1_0 and 1_3, and moderate to high densities in other zones. Immediate intervention is required to manage crowd density and enhance surveillance. Emergency response plans should be activated, and additional security personnel deployed to high-risk areas. Continuous monitoring of crowd movement and density is crucial to prevent overcrowding and potential bottlenecks.",
   },
   {
+    id: 'frame_0010_12000ms',
     risk_level: "High",
     risk_trend: "Increasing",
     hot_zones: [
@@ -214,7 +225,7 @@ export const sampleData: ExtendedCrowdData[] = [
       "1_1",
       "3_2",
     ],
-    time_stamp: "2024-06-21T14:30:00.012Z",
+    time_stamp: "0:12",
     image: "./backend/data/test_video_4k.mp4",
     summary: "The overall risk assessment is Moderate to High due to observed crowd densities and potential bottlenecks. Zones 0_0, 1_1, and 3_2 are of particular concern due to high crowd densities and potential overcrowding. Immediate attention is required to manage crowd distribution and prevent overcrowding. Potential infrastructure risks and inadequate facilities have been identified in several zones. Enhanced monitoring and crowd management strategies are necessary to mitigate risks.",
     insights: "Crowd crush risk in zones 0_0, 1_1, and 3_2, Exit blockage potential in zones 1_1 and 3_2, Security deployment needed in high-risk zones, Insufficient toilet facilities in zone 1_2",
@@ -226,6 +237,7 @@ export const sampleData: ExtendedCrowdData[] = [
     frame_summary: "The overall risk assessment is Moderate to High due to observed crowd densities and potential bottlenecks. Zones 0_0, 1_1, and 3_2 are of particular concern due to high crowd densities and potential overcrowding. Immediate attention is required to manage crowd distribution and prevent overcrowding. Potential infrastructure risks and inadequate facilities have been identified in several zones. Enhanced monitoring and crowd management strategies are necessary to mitigate risks.",
   },
   {
+    id: 'frame_0011_13200ms',
     risk_level: "High",
     risk_trend: "Increasing",
     hot_zones: [
@@ -235,7 +247,7 @@ export const sampleData: ExtendedCrowdData[] = [
       "2_2",
       "3_1",
     ],
-    time_stamp: "2024-06-21T14:30:00.013Z",
+    time_stamp: "0:13",
     image: "./backend/data/test_video_4k.mp4",
     summary: "The overall threat assessment indicates a high risk level due to multiple zones with high crowd densities and potential bottlenecks. Immediate intervention is required to mitigate these risks. Continuous monitoring and coordinated crowd management strategies across zones are crucial to ensuring safety.",
     insights: "Crowd crush risk in zones 0_2 and 1_2, Exit blockage potential in zones 2_0 and 2_2, Security deployment needed in high-risk zones",
@@ -247,6 +259,7 @@ export const sampleData: ExtendedCrowdData[] = [
     frame_summary: "The overall threat assessment indicates a high risk level due to multiple zones with high crowd densities and potential bottlenecks. Immediate intervention is required to mitigate these risks. Continuous monitoring and coordinated crowd management strategies across zones are crucial to ensuring safety.",
   },
   {
+    id: 'frame_0012_14400ms',
     risk_level: "High",
     risk_trend: "Increasing",
     hot_zones: [
@@ -255,7 +268,7 @@ export const sampleData: ExtendedCrowdData[] = [
       "2_2",
       "3_2",
     ],
-    time_stamp: "2024-06-21T14:30:00.014Z",
+    time_stamp: "0:14",
     image: "./backend/data/test_video_4k.mp4",
     summary: "The overall threat assessment indicates a moderate to high risk level across multiple zones due to overcrowding, potential bottlenecks, and infrastructure risks. Critical intervention requirements include increasing crowd monitoring, implementing crowd control measures, and reviewing emergency response plans. Continuous monitoring and follow-up are necessary to ensure crowd safety.",
     insights: "Crowd crush risk in zones 0_1, 1_1, 2_2, and 3_2, Exit blockage potential in zones 2_2 and 3_2, Security deployment needed in zones with potential bottlenecks",
@@ -267,6 +280,7 @@ export const sampleData: ExtendedCrowdData[] = [
     frame_summary: "The overall threat assessment indicates a moderate to high risk level across multiple zones due to overcrowding, potential bottlenecks, and infrastructure risks. Critical intervention requirements include increasing crowd monitoring, implementing crowd control measures, and reviewing emergency response plans. Continuous monitoring and follow-up are necessary to ensure crowd safety.",
   },
   {
+    id: 'frame_0013_15600ms',
     risk_level: "High",
     risk_trend: "Increasing",
     hot_zones: [
@@ -275,7 +289,7 @@ export const sampleData: ExtendedCrowdData[] = [
       "2_1",
       "2_3",
     ],
-    time_stamp: "2024-06-21T14:30:00.015Z",
+    time_stamp: "0:15",
     image: "./backend/data/test_video_4k.mp4",
     summary: "The overall threat assessment indicates a high level of risk across multiple zones due to excessive crowd density, potential bottlenecks, and infrastructure risks. Immediate intervention is required in zones like 0_1, 2_0, 2_1, and 2_3 to prevent potential crowd disasters. Continuous monitoring and crowd management strategies are necessary across all zones to ensure a safe environment.",
     insights: "Crowd crush risk, Exit blockage, Security deployment needed",
@@ -287,6 +301,7 @@ export const sampleData: ExtendedCrowdData[] = [
     frame_summary: "The overall threat assessment indicates a high level of risk across multiple zones due to excessive crowd density, potential bottlenecks, and infrastructure risks. Immediate intervention is required in zones like 0_1, 2_0, 2_1, and 2_3 to prevent potential crowd disasters. Continuous monitoring and crowd management strategies are necessary across all zones to ensure a safe environment.",
   },
   {
+    id: 'frame_0014_16800ms',
     risk_level: "High",
     risk_trend: "Increasing",
     hot_zones: [
@@ -294,7 +309,7 @@ export const sampleData: ExtendedCrowdData[] = [
       "Zone 0_1",
       "Zone 1_0",
     ],
-    time_stamp: "2024-06-21T14:30:00.016Z",
+    time_stamp: "0:16",
     image: "./backend/data/test_video_4k.mp4",
     summary: "The crowd density in several zones exceeds recommended safety guidelines, posing a significant risk of overcrowding and crowd crush. Zone 0_0 is at critical risk, while Zone 0_1 and Zone 1_0 are at high risk. Zone 0_3 is at moderate to high risk. Immediate crowd control measures are necessary.",
     insights: "Crowd crush risk in Zone 0_0, Exit blockage risk in Zone 0_1 and Zone 1_0, Security deployment needed in high-risk zones",
