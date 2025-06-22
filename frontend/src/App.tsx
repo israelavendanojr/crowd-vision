@@ -87,34 +87,6 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-6 text-gray-200">
       <div className="max-w-7xl mx-auto">
-        {/* Video Player */}
-        {/* Timeline Bar with Event Indicators */}
-        <div className="relative w-full h-4 bg-gray-700 rounded my-4">
-          {eventPercents.map((percent, i) => (
-            <button
-              key={i}
-              type="button"
-              className="absolute top-0 h-4 w-2 bg-blue-400 hover:bg-blue-600 transition-colors rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-              style={{ left: `calc(${percent}% - 1px)` }}
-              title={`Event at ${sampleData[i].time_stamp}`}
-              onClick={() => {
-                if (videoRef.current) {
-                  videoRef.current.currentTime = relativeFrameTimes[i];
-                  setVideoTime(relativeFrameTimes[i]);
-                }
-              }}
-              tabIndex={0}
-            />
-          ))}
-          {/* Optionally, a progress bar */}
-          <div
-            className="absolute top-0 left-0 h-4 bg-blue-600 opacity-30"
-            style={{
-              width: `${(videoTime / (relativeFrameTimes[relativeFrameTimes.length - 1])) * 100}%`
-            }}
-          />
-        </div>
-
         <Header data={sampleData[currentFrame]} />
         
         {/* Main Content Grid */}
