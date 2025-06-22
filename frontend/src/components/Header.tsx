@@ -3,6 +3,8 @@ import { Clock, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { CrowdData } from '../types';
 
 export const Header: React.FC<{ data: CrowdData; className?: string }> = ({ data, className = '' }) => {
+  if (!data) return null; // 👈 Prevent crash while loading
+
   const getRiskColor = (level: string) => {
     switch (level) {
       case 'LOW': return 'text-green-400 bg-green-900/20 dark:text-green-400 dark:bg-green-900/20';
@@ -21,14 +23,15 @@ export const Header: React.FC<{ data: CrowdData; className?: string }> = ({ data
     }
   };
 
-  
   return (
     <div className={`mb-6 ${className}`}>
       <h1 className="text-3xl font-bold text-gray-100 mb-2">Crowd Danger Detector</h1>
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <Clock className="w-5 h-5 text-gray-400" />
-          <span className="text-gray-400">{new Date(data.time_stamp).toLocaleString()}</span>
+          <span className="text-gray-400">
+            {new Date(data.time_stamp).toLocaleString()}
+          </span>
         </div>
         <div className={`px-3 py-1 rounded-full text-sm font-semibold ${getRiskColor(data.risk_level)}`}>
           {data.risk_level} RISK
