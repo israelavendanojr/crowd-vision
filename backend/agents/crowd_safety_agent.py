@@ -5,6 +5,7 @@ import os
 import base64
 import re
 from concurrent.futures import ThreadPoolExecutor
+import json
 
 class CrowdSafetyAgent:
     def __init__(self):
@@ -25,7 +26,17 @@ class CrowdSafetyAgent:
 
     # This analyzes the crowd for the entire frame
     def _analyze_crowd_density(self, image_path: str) -> str:
-        result = self.rfmodel.predict(image_path,confidence=0.01).json()
+        try:
+            result = self.rfmodel.predict(image_path, confidence=0.08).json()
+            return result
+        except Exception as e:
+            print(f"Prediction failed for image {image_path}: {e}")
+            raise e
+
+        if not os.path.exists(image_path):
+            raise FileNotFoundError(f"Missing image file: {image_path}")
+        else:
+            print(f"Sending image to Roboflow: {image_path}")
         
         
         zone_offsets = {
@@ -189,3 +200,54 @@ class CrowdSafetyAgent:
         )
 
         return response.completion_message.content.text
+
+    def summarize_frame_as_json(self, folder_path: str, image_path: str = None, timestamp: str = None) -> dict:
+        """
+        Generates a complete JSON summary of a frame for frontend display.
+        """
+        # 1. Get frame-level summary and policy analysis
+        summary = self.getresponse_grid(folder_path)
+        guidelines = self.lookup_guidelines(summary)
+
+        # 2. Prompt LLM to convert to JSON
+        prompt = (
+            f"You are a safety analytics agent generating JSON for a crowd monitoring dashboard.\n"
+            f"Using both the visual analysis of the scene and the safety policy reasoning below, generate a structured JSON with these fields:\n\n"
+            f"- risk_level (High/Medium/Low)\n"
+            f"- risk_trend (Stable/Increasing/Decreasing — infer from context)\n"
+            f"- hot_zones (list of zone IDs showing danger)\n"
+            f"- time_stamp (leave as null or use provided timestamp)\n"
+            f"- text_summary (a high-level 3–5 sentence analysis of the situation in clinical tone)\n"
+            f"- insights (list of short safety observations, i.e., crowd crush risk, exit blockage, security deployment needed)\n"
+            f"- flags (list of bold alert strings, i.e., EMERGENCY CROWD - CRUSH RISK, HIGH DENSITY)\n"
+            f"- protocol (summary of recommended response strategy from the safety guidelines)\n\n"
+            f"FRAME VISUAL ANALYSIS:\n{summary}\n\n"
+            f"SAFETY POLICY ANALYSIS:\n{guidelines}\n\n"
+            f"Respond ONLY in raw JSON. DO NOT include code blocks or explanations. Example:\n"
+            f'{{"risk_level": "High", "risk_trend": "Stable", "hot_zones": [...], "time_stamp": null, ...}}'
+        )
+
+        # 3. Get LLM output
+        response = self.client.chat.completions.create(
+            model="Llama-4-Maverick-17B-128E-Instruct-FP8",
+            messages=[{"role": "user", "content": prompt}],
+        )
+
+        raw_output = response.completion_message.content.text
+        print("LLM RAW OUTPUT:\n", raw_output)
+
+        # 4. Strip triple backticks if they exist
+        cleaned_output = re.sub(r"^```(?:json)?\s*|```$", "", raw_output.strip(), flags=re.MULTILINE).strip()
+
+        try:
+            json_response = json.loads(cleaned_output)
+        except json.JSONDecodeError as e:
+            print("JSON parse error:", e)
+            return {"error": "Invalid JSON from LLM"}
+
+        # 5. Inject any extra metadata
+        json_response["image"] = image_path
+        json_response["time_stamp"] = timestamp
+
+        return json_response
+        
