@@ -201,7 +201,7 @@ class CrowdSafetyAgent:
 
         return response.completion_message.content.text
 
-    def summarize_frame_as_json(self, folder_path: str, image_path: str = None, timestamp: str = None) -> dict:
+    def summarize_frame_as_json(self, folder_path: str, timestamp: str = None) -> dict:
         """
         Generates a complete JSON summary of a frame for frontend display.
         """
@@ -213,18 +213,17 @@ class CrowdSafetyAgent:
         prompt = (
             f"You are a safety analytics agent generating JSON for a crowd monitoring dashboard.\n"
             f"Using both the visual analysis of the scene and the safety policy reasoning below, generate a structured JSON with these fields:\n\n"
+            f"FRAME VISUAL ANALYSIS:\n{summary}\n\n"
+            f"SAFETY POLICY ANALYSIS:\n{guidelines}\n\n"
             f"- risk_level (High/Medium/Low)\n"
             f"- risk_trend (Stable/Increasing/Decreasing — infer from context)\n"
-            f"- hot_zones (list of zone IDs showing danger)\n"
-            f"- time_stamp (leave as null or use provided timestamp)\n"
             f"- text_summary (a high-level 3–5 sentence analysis of the situation in clinical tone)\n"
+            f"- hot_zones (list of zone IDs showing danger, should only include the IDs, i.e., ['0_0', '0_1'])\n"
             f"- insights (list of short safety observations, i.e., crowd crush risk, exit blockage, security deployment needed)\n"
             f"- flags (list of bold alert strings, i.e., EMERGENCY CROWD - CRUSH RISK, HIGH DENSITY)\n"
             f"- protocol (summary of recommended response strategy from the safety guidelines)\n\n"
-            f"FRAME VISUAL ANALYSIS:\n{summary}\n\n"
-            f"SAFETY POLICY ANALYSIS:\n{guidelines}\n\n"
             f"Respond ONLY in raw JSON. DO NOT include code blocks or explanations. Example:\n"
-            f'{{"risk_level": "High", "risk_trend": "Stable", "hot_zones": [...], "time_stamp": null, ...}}'
+            f'{{"risk_level": "High", "risk_trend": "Stable", "hot_zones": [...], "insights": [...], "flags": [...], "protocol": "...", ...}}'
         )
 
         # 3. Get LLM output
@@ -246,8 +245,8 @@ class CrowdSafetyAgent:
             return {"error": "Invalid JSON from LLM"}
 
         # 5. Inject any extra metadata
-        json_response["image"] = image_path
-        json_response["time_stamp"] = timestamp
+        json_response["timestamp"] = timestamp
+        json_response["rag_summary"] = guidelines
 
         return json_response
-        
+    
