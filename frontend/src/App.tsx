@@ -140,7 +140,7 @@ const App: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
-                  <h2 className="text-2xl font-bold text-white mb-4">Crowd Safety Analysis</h2>
+                  <h2 className="text-2xl font-bold text-white mb-4">Cummulative Findings</h2>
                   <div className="prose prose-invert max-w-none">
                     <pre className="whitespace-pre-wrap font-sans">{summaryContent}</pre>
                   </div>
