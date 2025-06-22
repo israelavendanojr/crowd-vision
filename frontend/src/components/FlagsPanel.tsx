@@ -15,7 +15,7 @@ export const FlagsPanel: React.FC<Props> = ({ flags }) => {
   if (!Array.isArray(flags)) return null; // Prevent rendering when flags is undefined
 
   return (
-    <div className="bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-700">
+    <div className="bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-700 transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
       <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
         <Flag className="w-5 h-5 text-purple-400" />
         System Flags

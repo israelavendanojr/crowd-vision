@@ -88,7 +88,7 @@ export const RiskTrendChart: React.FC<Props> = ({ data, currentFrame }) => {
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-700">
+    <div className="bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-700 transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
       <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
         <TrendingUp className="w-5 h-5 text-green-400" />
         Risk Level Over Time

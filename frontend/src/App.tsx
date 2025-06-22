@@ -10,7 +10,6 @@ import { FlagsPanel } from './components/FlagsPanel';
 import { RiskTrendChart } from './components/RiskTrendChart';
 import { HotZonesChart } from './components/HotZonesChart';
 import { sampleData } from './sampleData';
-import { FrameSummaryModal } from './components/FrameSummaryModal';
 
 const App: React.FC = () => {
   const [currentFrame, setCurrentFrame] = useState(0);
@@ -19,6 +18,7 @@ const App: React.FC = () => {
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [summaryContent, setSummaryContent] = useState('Loading summary...');
 
   // Extend the imported CrowdData type with frame_summary
   type ExtendedCrowdData = CrowdData & {
@@ -51,6 +51,22 @@ const App: React.FC = () => {
 
   // Timeline event indicators (as percentages)
   const eventPercents = relativeFrameTimes.map(t => (t / (relativeFrameTimes[relativeFrameTimes.length - 1])) * 100);
+
+  useEffect(() => {
+    // Fetch the summary text file when the component mounts
+    const fetchSummary = async () => {
+      try {
+        const response = await fetch('/summary.txt');
+        const text = await response.text();
+        setSummaryContent(text);
+      } catch (error) {
+        console.error('Error loading summary:', error);
+        setSummaryContent('Failed to load summary. Please try again later.');
+      }
+    };
+
+    fetchSummary();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-6 text-gray-200">
@@ -88,18 +104,49 @@ const App: React.FC = () => {
               <HotZonesChart data={sampleData} />
             </div>
             
-            {/* Frame Summary Button */}
-            <div className="mt-4">
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            {/* Summary Panel */}
+            <div className="mt-6 bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-700 transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
+              <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h2a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
-                View Frame Summary
+                Cummulative Findings
+              </h3>
+              <div className="max-h-48 overflow-y-auto pr-2 mb-4">
+                <pre className="text-sm text-gray-300 whitespace-pre-wrap font-sans">
+                  {summaryContent.substring(0, 300)}{summaryContent.length > 500 ? '...' : ''}
+                </pre>
+              </div>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 flex items-center justify-center gap-2 hover:scale-[1.02] hover:shadow-md"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+                </svg>
+                View Full Analysis
               </button>
             </div>
+
+            {/* Modal - This will be conditionally rendered */}
+            {isModalOpen && (
+              <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+                <div className="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="absolute top-4 right-4 text-gray-400 hover:text-white"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                  <h2 className="text-2xl font-bold text-white mb-4">Crowd Safety Analysis</h2>
+                  <div className="prose prose-invert max-w-none">
+                    <pre className="whitespace-pre-wrap font-sans">{summaryContent}</pre>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right Column - Status Panels */}
@@ -132,12 +179,6 @@ const App: React.FC = () => {
 
       </div>
       
-      {/* Frame Summary Modal */}
-      <FrameSummaryModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        summary={sampleData[currentFrame].frame_summary || 'No summary available for this frame.'} 
-      />
     </div>
   );
 };

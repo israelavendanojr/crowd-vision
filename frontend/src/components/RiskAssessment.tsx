@@ -31,7 +31,7 @@ const getRiskColor = (level: string) => {
 export const RiskAssessment: React.FC<Props> = ({ riskLevel, riskTrend, summary }) => {
   const riskColor = getRiskColor(riskLevel);
   return (
-  <div className="bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-600">
+  <div className="bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-600 transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
     <h3 className="text-lg font-semibold text-gray-200 mb-4 flex items-center gap-2">
       <AlertTriangle className="w-5 h-5 text-yellow-400" />
       Risk Assessment
