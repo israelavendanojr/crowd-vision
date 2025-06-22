@@ -12,9 +12,8 @@ import { HotZonesChart } from './components/HotZonesChart';
 
 const App: React.FC = () => {
   const [currentFrame, setCurrentFrame] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [videoTime, setVideoTime] = useState(0);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   // Extend the imported CrowdData type with frame_summary
   type ExtendedCrowdData = CrowdData & {
@@ -24,7 +23,7 @@ const App: React.FC = () => {
   const sampleData: ExtendedCrowdData[] = [
     {
       time_stamp: "2024-06-21T14:30:00Z",
-      image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzM3NDE1MSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkZyYW1lIDEgLSBMb3cgUmlzazwvdGV4dD48L3N2Zz4=",
+      image: "http://localhost:5001/video/test_video_4k.mp4", // <-- update this line
       risk_level: "LOW",
       risk_trend: "STABLE",
       hot_zones: ["Zone A", "Zone C"],
@@ -36,7 +35,7 @@ const App: React.FC = () => {
     },
     {
       time_stamp: "2024-06-21T14:31:00Z",
-      image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmVmM2NkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzM3NDE1MSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkZyYW1lIDIgLSBNZWRpdW0gUmlzazwvdGV4dD48L3N2Zz4=",
+      image: "./backend/data/test_video_4k.mp4",
       risk_level: "MEDIUM",
       risk_trend: "INCREASING",
       hot_zones: ["Zone A", "Zone B", "Zone D"],
@@ -48,7 +47,7 @@ const App: React.FC = () => {
     },
     {
       time_stamp: "2024-06-21T14:32:00Z",
-      image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmVlMmVlIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzM3NDE1MSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkZyYW1lIDMgLSBIaWdoIFJpc2s8L3RleHQ+PC9zdmc=",
+      image: "./backend/data/test_video_4k.mp4",
       risk_level: "HIGH",
       risk_trend: "INCREASING",
       hot_zones: ["Zone A", "Zone B", "Zone C", "Zone D"],
@@ -60,48 +59,72 @@ const App: React.FC = () => {
     }
   ];
 
-  const currentData = sampleData[currentFrame];
+  // Parse time_stamps to seconds (relative to video start)
+  const frameTimes = sampleData.map(d => new Date(d.time_stamp).getTime() / 1000);
+  const videoStart = frameTimes[0];
+  const relativeFrameTimes = frameTimes.map(t => t - videoStart);
 
+  // Find the closest frame for the current video time
   useEffect(() => {
-    if (isPlaying) {
-      intervalRef.current = setInterval(() => {
-        setCurrentFrame((prev) => (prev + 1) % sampleData.length);
-      }, 1000 / playbackSpeed);
-    } else {
-      clearInterval(intervalRef.current!);
+    const idx = relativeFrameTimes.findIndex((t, i) =>
+      videoTime >= t && (i === relativeFrameTimes.length - 1 || videoTime < relativeFrameTimes[i + 1])
+    );
+    if (idx !== -1 && idx !== currentFrame) setCurrentFrame(idx);
+  }, [videoTime, relativeFrameTimes, currentFrame]);
+
+  // Handler for video time update
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      setVideoTime(videoRef.current.currentTime);
     }
-    return () => clearInterval(intervalRef.current!);
-  }, [isPlaying, playbackSpeed]);
+  };
+
+  // Timeline event indicators (as percentages)
+  const eventPercents = relativeFrameTimes.map(t => (t / (relativeFrameTimes[relativeFrameTimes.length - 1])) * 100);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-6 text-gray-200">
       <div className="max-w-7xl mx-auto">
-        <Header data={currentData} />
+        {/* Video Player */}
+        <video
+          ref={videoRef}
+          width="640"
+          height="360"
+          controls
+          src="video/test_video_4k.mp4"
+          onTimeUpdate={handleTimeUpdate}
+        />
+        {/* Timeline Bar with Event Indicators */}
+        <div className="relative w-full h-4 bg-gray-700 rounded my-4">
+          {eventPercents.map((percent, i) => (
+            <div
+              key={i}
+              className="absolute top-0 h-4 w-1 bg-blue-400"
+              style={{ left: `${percent}%` }}
+              title={`Event at ${sampleData[i].time_stamp}`}
+            />
+          ))}
+          {/* Optionally, a progress bar */}
+          <div
+            className="absolute top-0 left-0 h-4 bg-blue-600 opacity-30"
+            style={{
+              width: `${(videoTime / (relativeFrameTimes[relativeFrameTimes.length - 1])) * 100}%`
+            }}
+          />
+        </div>
+
+        <Header data={sampleData[currentFrame]} />
         
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           {/* Left Column - Video Player and Frame Analysis */}
           <div className="lg:col-span-2 bg-gray-700 rounded-lg shadow-lg p-6 border border-gray-600 transition-transform duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-blue-500/50 flex flex-col">
-            <div className="flex-grow-0">
-              <VideoPlayer src={currentData.image} frame={currentFrame} total={sampleData.length} />
-              <TimelineControls
-                isPlaying={isPlaying}
-                onToggle={() => setIsPlaying(!isPlaying)}
-                onNext={() => setCurrentFrame((prev) => (prev + 1) % sampleData.length)}
-                onPrev={() => setCurrentFrame((prev) => (prev - 1 + sampleData.length) % sampleData.length)}
-                speed={playbackSpeed}
-                setSpeed={setPlaybackSpeed}
-                currentFrame={currentFrame}
-                totalFrames={sampleData.length}
-                setFrame={setCurrentFrame}
-              />
-            </div>
             {/* Frame Analysis */}
             <div className="mt-4 pt-4 border-t border-gray-600/50 w-full text-center flex flex-col flex-grow min-h-0">
               <h3 className="text-base font-medium text-gray-100 mb-3">Frame Analysis</h3>
               <div className="text-gray-300 leading-relaxed space-y-2 overflow-y-auto pr-2 flex-grow">
-                {currentData.frame_summary ? (
-                  currentData.frame_summary.split('. ').map((sentence, i, arr) => 
+                {sampleData[currentFrame].frame_summary ? (
+                  sampleData[currentFrame].frame_summary.split('. ').map((sentence, i, arr) => 
                     sentence ? (
                       <p key={i} className="w-full">
                         {sentence.trim()}{i < arr.length - 1 ? '.' : ''}
@@ -117,22 +140,22 @@ const App: React.FC = () => {
           <div className="space-y-6">
             <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
               <RiskAssessment
-                riskLevel={currentData.risk_level}
-                riskTrend={currentData.risk_trend}
-                summary={currentData.summary}
+                riskLevel={sampleData[currentFrame].risk_level}
+                riskTrend={sampleData[currentFrame].risk_trend}
+                summary={sampleData[currentFrame].summary}
               />
             </div>
             
             <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
-              <HotZones zones={currentData.hot_zones} />
+              <HotZones zones={sampleData[currentFrame].hot_zones} />
             </div>
             
             <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
-              <InsightsPanel insights={currentData.insights} protocol={currentData.protocol} />
+              <InsightsPanel insights={sampleData[currentFrame].insights} protocol={sampleData[currentFrame].protocol} />
             </div>
             
             <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
-              <FlagsPanel flags={currentData.flags} />
+              <FlagsPanel flags={sampleData[currentFrame].flags} />
             </div>
           </div>
         </div>
