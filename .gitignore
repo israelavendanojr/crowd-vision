@@ -8,3 +8,5 @@ frontend/node_modules
 /backend/data
 /backend/agents/__pycache__
 data/
+venv310/
+backend/venv310

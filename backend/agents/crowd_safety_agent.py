@@ -4,9 +4,8 @@ from rag_utils import load_vectorstore, search_similar_chunks
 import os
 import base64
 import re
-from vision_language_tool import VisionLanguageTool
-
-
+from concurrent.futures import ThreadPoolExecutor
+import json
 
 class CrowdSafetyAgent:
     def __init__(self):
@@ -27,7 +26,17 @@ class CrowdSafetyAgent:
 
     # This analyzes the crowd for the entire frame
     def _analyze_crowd_density(self, image_path: str) -> str:
-        result = self.rfmodel.predict(image_path,confidence=0.01).json()
+        try:
+            result = self.rfmodel.predict(image_path, confidence=0.08).json()
+            return result
+        except Exception as e:
+            print(f"Prediction failed for image {image_path}: {e}")
+            raise e
+
+        if not os.path.exists(image_path):
+            raise FileNotFoundError(f"Missing image file: {image_path}")
+        else:
+            print(f"Sending image to Roboflow: {image_path}")
         
         
         zone_offsets = {
@@ -61,74 +70,86 @@ class CrowdSafetyAgent:
         res = adjust_detections_to_global(result,zone_offsets)
         
         return res
+
+
+    def process_zone(self, full_path):
+        crowd_response = self.getresponse_crowd(full_path)
+        guidelines = self.lookup_guidelines(crowd_response)
+        return self.zone_report(guidelines)
+
+    def grid_analyze_crowd(self, folder_path: str) -> str:
+        """Each Frame is already turned into individual zones, each zone is labeled zone_row_column.png,
+           We are going to iterate through all the zone images and analyze the density in each and add it all together
+
+        Args:
+            folderpath (str): Folder containing zone images
+
+        Returns:
+            str: description of each folder
+        """
+        res = ""
+        # 8 MAX WORKERS is the fastest Speed
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            futures = []
+            for filename in os.listdir(folder_path):
+                full_path = os.path.join(folder_path, filename)
+                futures.append(executor.submit(self.process_zone, full_path))
+            for future in futures:
+                res += future.result()
+        return res
     
-    # def grid_analyze_crowd(self, folder_path: str) -> str:
-    #     """Each Frame is already turned into individual zones, each zone is labeled zone_row_column.png,
-    #        We are going to iterate through all the zone images and analyze the density in each and add it all together
-
-    #     Args:
-    #         folderpath (str): Folder containing zone images
-
-    #     Returns:
-    #         str: description of each folder
-    #     """
-    #     res = ""
+    def getresponse_grid(self, folder_path: str):
         
-    #     ## Getresponse_crowd -> Lookup Guidelings -> Summarize Guideline response
-    #     for filename in os.listdir(folder_path):
-    #         full_path = os.path.join(folder_path, filename)
-    #         crowd_response = self.getresponse_crowd(full_path)
-    #         guidelines = self.lookup_guidelines(crowd_response)
-    #         res+= self.zone_report(guidelines)
-    #     return res
+        grid_analysis = self.grid_analyze_crowd(folder_path)
+
+        prompt = (
+            "You are a crowd safety expert analyzing a grid-based surveillance system. Each zone follows 'row_column' format (e.g., zone '0_0' = top-left). "
+            "Provide comprehensive safety analysis for ALL zones with: 1) Zone-by-zone density assessment (people/m², risk level with detailed justification), "
+            "2) Movement patterns and bottlenecks, 3) Infrastructure risks and escape routes, 4) Behavioral anomalies and safety concerns, "
+            "5) Inter-zone correlations and cascade risks, 6) Critical intervention requirements with specific personnel/resource needs, "
+            "7) Executive summary with overall threat assessment. Format with clear zone headers for operational use by emergency teams.\n\n"
+            f"GRID ANALYSIS DATA:\n{grid_analysis}\n\n"
+            "Provide detailed analysis ensuring no zone or safety consideration is overlooked - this data guides life-safety decisions."
+        )
+
+        response = self.client.chat.completions.create(
+            model="Llama-4-Maverick-17B-128E-Instruct-FP8",
+            messages=[
+                {"role": "user", "content": prompt}
+            ],
+        )
+
+        return response.completion_message.content.text
     
-    # def getresponse_grid(self, folder_path: str):
+    def getresponse_crowd(self, image_path: str) -> str:
         
-    #     grid_analysis = self.grid_analyze_crowd(folder_path)
-
-    #     prompt = (
-    #         "You are a crowd safety expert analyzing a grid-based surveillance system. Each zone follows 'row_column' format (e.g., zone '0_0' = top-left). "
-    #         "Provide comprehensive safety analysis for ALL zones with: 1) Zone-by-zone density assessment (people/m², risk level with detailed justification), "
-    #         "2) Movement patterns and bottlenecks, 3) Infrastructure risks and escape routes, 4) Behavioral anomalies and safety concerns, "
-    #         "5) Inter-zone correlations and cascade risks, 6) Critical intervention requirements with specific personnel/resource needs, "
-    #         "7) Executive summary with overall threat assessment. Format with clear zone headers for operational use by emergency teams.\n\n"
-    #         f"GRID ANALYSIS DATA:\n{grid_analysis}\n\n"
-    #         "Provide detailed analysis ensuring no zone or safety consideration is overlooked - this data guides life-safety decisions."
-    #     )
-
-    #     response = self.client.chat.completions.create(
-    #         model="Llama-4-Maverick-17B-128E-Instruct-FP8",
-    #         messages=[
-    #             {"role": "user", "content": prompt}
-    #         ],
-    #     )
-
-    #     return response.completion_message.content.text
-    
-    # def getresponse_crowd(self, image_path: str) -> str:
+        crowd_summary = self._analyze_crowd_density(image_path)  
+        zone_match = re.search(r'zone_(\d+_\d+)', image_path)
+        zone_label = zone_match.group(1) if zone_match else "UNKNOWN_ZONE"
         
-    #     crowd_summary = self._analyze_crowd_density(image_path)  
-    #     zone_match = re.search(r'zone_(\d+_\d+)', image_path)
-    #     zone_label = zone_match.group(1) if zone_match else "UNKNOWN_ZONE"
+        scene_description = "#The image presents an aerial view of a bustling night market, characterized by a grid-like layout of stalls and vendors. The scene is illuminated by a multitude of lights, creating a vibrant and dynamic atmosphere. Key Features: Grid Layout: The market is organized into a grid pattern, with rows and columns of stalls and vendors. Crowd Density: The area is densely populated, with a large number of people visible throughout the market.Lighting: The scene is brightly lit, with a variety of light sources, including overhead lighting, stall lights, and possibly streetlights.Stall Variety: The stalls appear to be diverse, with different colors, shapes, and sizes, suggesting a range of products and services being offered. Motorcycles: Many motorcycles are parked throughout the market, indicating that they are a common mode of transportation for attendees. Basketball Courts: Two basketball courts are visible on the right side of the image, suggesting that the market is located in a public park or recreational area. Visual Cues: The image is taken from directly above, providing a bird's-eye view of the market. The lighting is predominantly artificial, with a warm orange glow emanating from the left side of the image. The crowd is densely packed, with people visible in every direction. The stalls and vendors are arranged in a seemingly organized manner, with clear pathways between them. Relevant Information for Llama: The image suggests a high level of activity and energy, with a large crowd and a variety of vendors and stalls. The grid layout and organized arrangement of stalls imply a well-planned and managed event. The presence of motorcycles and basketball courts provides context about the surrounding environment and the demographics of the attendees. The image could be used to analyze crowd behavior, vendor distribution, and market dynamics, among other aspects.By examining this image, Llama can gain insights into the characteristics of a night market, including its layout, crowd density, and vendor diversity. This information can be used to inform reasoning about the features encoded in a video feed that looks like this, such as object detection, crowd tracking, and scene understanding"
+        
+        prompt = (
+            f"Analyze surveillance data for zone {zone_label} from computer vision crowd monitoring. "
+            f"This scene is part of a larger environment described as: {scene_description}\n\n"
+            f"Provide a comprehensive description including: "
+            f"1) Spatial layout and infrastructure, 2) Precise crowd density (people/m²) and distribution patterns, 3) Movement flows and directional conflicts, "
+            f"4) Crowd clustering and social organization, 5) Bottlenecks and movement restrictions, 6) Behavioral indicators and anomalies, "
+            f"7) Safety risk indicators and stability assessment, 8) Temporal dynamics and trend analysis. "
+            f"Write 200–300 words with clinical precision for integration with other zone analyses.\n\n"
+            f"ZONE {zone_label} COMPUTER VISION DATA:\n{crowd_summary}\n\n"
+            f"Reference zone {zone_label} throughout for spatial correlation with adjacent zones."
+        )
 
-    #     prompt = (
-    #         f"Analyze surveillance data for zone {zone_label} from computer vision crowd monitoring. Provide comprehensive description including: "
-    #         f"1) Spatial layout and infrastructure, 2) Precise crowd density (people/m²) and distribution patterns, 3) Movement flows and directional conflicts, "
-    #         f"4) Crowd clustering and social organization, 5) Bottlenecks and movement restrictions, 6) Behavioral indicators and anomalies, "
-    #         f"7) Safety risk indicators and stability assessment, 8) Temporal dynamics and trend analysis. "
-    #         f"Write 200-300 words with clinical precision for integration with other zone analyses.\n\n"
-    #         f"ZONE {zone_label} COMPUTER VISION DATA:\n{crowd_summary}\n\n"
-    #         f"Reference zone {zone_label} throughout for spatial correlation with adjacent zones."
-    #     )
         
-    #     response = self.client.chat.completions.create(
-    #         model="Llama-4-Maverick-17B-128E-Instruct-FP8",
-    #         messages=[
-    #             {"role": "user", "content": prompt}
-    #         ],
-    #     )
+        response = self.client.chat.completions.create(
+            model="Llama-4-Maverick-17B-128E-Instruct-FP8",
+            messages=[
+                {"role": "user", "content": prompt}
+            ],
+        )
         
-    #     return response.completion_message.content.text
+        return response.completion_message.content.text
         
     def lookup_guidelines(self, situation: str, top_k: int = 3) -> str:
         
@@ -158,44 +179,75 @@ class CrowdSafetyAgent:
 
         return response.completion_message.content.text
 
-    # def zone_report(self, detailed_response: str) -> str:
-    #     """
-    #     Takes a longform safety guideline explanation and summarizes it into key takeaways.
-    #     Ideal for alerts or summary sections in a report.
-    #     """
-    #     prompt = (
-    #         f"Extract and organize ALL critical safety data from this analysis for operational use. Preserve complete information for: "
-    #         f"1) Zone identification and spatial context, 2) All safety concerns with severity levels, 3) Complete risk assessments and classifications, "
-    #         f"4) Behavioral observations and crowd dynamics, 5) All intervention recommendations with timelines/resources, 6) Technical metrics and measurements, "
-    #         f"7) Emergency response requirements, 8) Monitoring and follow-up needs. Organize with clear headers for rapid decision-making by emergency personnel. "
-    #         f"DO NOT summarize - extract complete detailed information while maintaining zone spatial context throughout.\n\n"
-    #         f"DETAILED SAFETY ANALYSIS:\n{detailed_response}\n\n"
-    #         f"Structure for integration with other zone reports while preserving all critical safety information."
-    #     )
-
-    #     response = self.client.chat.completions.create(
-    #         model="Llama-4-Maverick-17B-128E-Instruct-FP8",
-    #         messages=[{"role": "user", "content": prompt}],
-    #     )
-
-    #     return response.completion_message.content.text
-
-    def get_zone_captions(self, zones_folder_path: str):
+    def zone_report(self, detailed_response: str) -> str:
         """
-        Returns a list of zone descriptions from the vision-language tool.
-        Each item is { "zone": zone_id, "description": text }
+        Takes a longform safety guideline explanation and summarizes it into key takeaways.
+        Ideal for alerts or summary sections in a report.
         """
-        results = []
+        prompt = (
+            f"Extract and organize ALL critical safety data from this analysis for operational use. Preserve complete information for: "
+            f"1) Zone identification and spatial context, 2) All safety concerns with severity levels, 3) Complete risk assessments and classifications, "
+            f"4) Behavioral observations and crowd dynamics, 5) All intervention recommendations with timelines/resources, 6) Technical metrics and measurements, "
+            f"7) Emergency response requirements, 8) Monitoring and follow-up needs. Organize with clear headers for rapid decision-making by emergency personnel. "
+            f"DO NOT summarize - extract complete detailed information while maintaining zone spatial context throughout.\n\n"
+            f"DETAILED SAFETY ANALYSIS:\n{detailed_response}\n\n"
+            f"Structure for integration with other zone reports while preserving all critical safety information."
+        )
 
-        for filename in sorted(os.listdir(zones_folder_path)):
-            if filename.endswith(".png"):
-                zone_path = os.path.join(zones_folder_path, filename)
-                zone_label = filename.replace(".png", "")
-                caption = self.vision_tool.describe_zone(zone_path)
-                results.append({
-                    "zone": zone_label,
-                    "description": caption
-                })
+        response = self.client.chat.completions.create(
+            model="Llama-4-Maverick-17B-128E-Instruct-FP8",
+            messages=[{"role": "user", "content": prompt}],
+        )
 
-        return results
+        return response.completion_message.content.text
 
+    def summarize_frame_as_json(self, folder_path: str, image_path: str = None, timestamp: str = None) -> dict:
+        """
+        Generates a complete JSON summary of a frame for frontend display.
+        """
+        # 1. Get frame-level summary and policy analysis
+        summary = self.getresponse_grid(folder_path)
+        guidelines = self.lookup_guidelines(summary)
+
+        # 2. Prompt LLM to convert to JSON
+        prompt = (
+            f"You are a safety analytics agent generating JSON for a crowd monitoring dashboard.\n"
+            f"Using both the visual analysis of the scene and the safety policy reasoning below, generate a structured JSON with these fields:\n\n"
+            f"- risk_level (High/Medium/Low)\n"
+            f"- risk_trend (Stable/Increasing/Decreasing — infer from context)\n"
+            f"- hot_zones (list of zone IDs showing danger)\n"
+            f"- time_stamp (leave as null or use provided timestamp)\n"
+            f"- text_summary (a high-level 3–5 sentence analysis of the situation in clinical tone)\n"
+            f"- insights (list of short safety observations, i.e., crowd crush risk, exit blockage, security deployment needed)\n"
+            f"- flags (list of bold alert strings, i.e., EMERGENCY CROWD - CRUSH RISK, HIGH DENSITY)\n"
+            f"- protocol (summary of recommended response strategy from the safety guidelines)\n\n"
+            f"FRAME VISUAL ANALYSIS:\n{summary}\n\n"
+            f"SAFETY POLICY ANALYSIS:\n{guidelines}\n\n"
+            f"Respond ONLY in raw JSON. DO NOT include code blocks or explanations. Example:\n"
+            f'{{"risk_level": "High", "risk_trend": "Stable", "hot_zones": [...], "time_stamp": null, ...}}'
+        )
+
+        # 3. Get LLM output
+        response = self.client.chat.completions.create(
+            model="Llama-4-Maverick-17B-128E-Instruct-FP8",
+            messages=[{"role": "user", "content": prompt}],
+        )
+
+        raw_output = response.completion_message.content.text
+        print("LLM RAW OUTPUT:\n", raw_output)
+
+        # 4. Strip triple backticks if they exist
+        cleaned_output = re.sub(r"^```(?:json)?\s*|```$", "", raw_output.strip(), flags=re.MULTILINE).strip()
+
+        try:
+            json_response = json.loads(cleaned_output)
+        except json.JSONDecodeError as e:
+            print("JSON parse error:", e)
+            return {"error": "Invalid JSON from LLM"}
+
+        # 5. Inject any extra metadata
+        json_response["image"] = image_path
+        json_response["time_stamp"] = timestamp
+
+        return json_response
+        

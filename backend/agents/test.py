@@ -1,24 +1,25 @@
 import os
-import base64
+import json
 from dotenv import load_dotenv
 from crowd_safety_agent import CrowdSafetyAgent
 
-# Load environment variables from .env
+# Load environment variables
 load_dotenv()
 
 def main():
-    #print(os.path.exists(r"backend\data\folderwork\frame_0000_0ms\zones"))
-    #print(os.path.exists("backend/data/safety_vector_index.index"))
-    try:
+    agent = CrowdSafetyAgent()
 
-        agent = CrowdSafetyAgent()
+    # Use Unix-style paths (macOS/Linux)
+    folder_path = "data/folderwork/frame_0000_0ms/zones"
+    timestamp = "0"
 
-        print("\n FULL REPORT FOR FRAME 0000")
-        full_description = agent.getresponse_grid(r"backend\data\folderwork\frame_0000_0ms\zones")
-        print(full_description)
-        
-    except Exception as e:
-        print(f"Error: {e}")
+    # Generate summary
+    json_report = agent.summarize_frame_as_json(
+        folder_path=folder_path,
+        timestamp=timestamp
+    )
+
+    print(json.dumps(json_report, indent=2))
 
 if __name__ == "__main__":
     main()
