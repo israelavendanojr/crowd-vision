@@ -41,7 +41,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const loadDetectionData = async () => {
       setDataLoading(true);
       try {
-        const response = await fetch("/test_frame_objs.txt");
+        const response = await fetch("/coordinates/frame_0000_0ms.txt");
         const textData = await response.text();
 
         const parsedData: DetectionPoint[] = [];
@@ -78,10 +78,14 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const generateHeatmapData = () => {
     if (detectionData.length === 0) return [];
 
+    // Offset values (in pixels) to move points down and right
+    const xOffset = 50;
+    const yOffset = 50;
+
     return detectionData.map((point) => ({
       // Normalize coordinates to video player dimensions (assuming 1920x1080 source)
-      x: (point.x / 1920) * 100,
-      y: (point.y / 1080) * 100,
+      x: ((point.x + xOffset) / 1920) * 100,
+      y: ((point.y + yOffset) / 1022) * 100,
       confidence: point.confidence,
     }));
   };
@@ -91,7 +95,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   return (
     <div className="mb-4">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-xl font-semibold">Live Feed</h2>
+        <h2 className="text-xl font-semibold">Video Feed</h2>
         <div className="flex gap-2">
           <button
             className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
@@ -174,9 +178,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 style={{
                   left: `${point.x}%`,
                   top: `${point.y}%`,
-                  width: "4px",
-                  height: "4px",
-                  transform: "translate(-50%, -50%)",
+                  width: "6px",
+                  height: "6px",
                   opacity: Math.max(0.6, point.confidence), // Use confidence for opacity
                 }}
               />

@@ -118,21 +118,6 @@ const App: React.FC = () => {
               <RiskTrendChart data={sampleData} currentFrame={currentFrame} />
               <HotZonesChart data={sampleData} />
             </div>
-            {/* Frame Analysis */}
-            <div className="mt-4 pt-4 border-t border-gray-600/50 w-full text-center flex flex-col flex-grow min-h-0">
-              <h3 className="text-base font-medium text-gray-100 mb-3">Frame Analysis</h3>
-              <div className="text-gray-300 leading-relaxed space-y-2 overflow-y-auto pr-2 flex-grow">
-                {sampleData[currentFrame].frame_summary ? (
-                  sampleData[currentFrame].frame_summary.split('. ').map((sentence, i, arr) => 
-                    sentence ? (
-                      <p key={i} className="w-full">
-                        {sentence.trim()}{i < arr.length - 1 ? '.' : ''}
-                      </p>
-                    ) : null
-                  )
-                ) : "No analysis available for this frame."}
-              </div>
-            </div>
           </div>
 
           {/* Right Column - Status Panels */}
