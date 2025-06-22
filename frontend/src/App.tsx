@@ -64,6 +64,7 @@ const App: React.FC = () => {
                 src="/video/test_video_4k.mp4"
                 videoRef={videoRef}
                 onTimeUpdate={handleTimeUpdate}
+                frameId={sampleData[currentFrame].id}
               />
               <TimelineControls
                 eventPercents={eventPercents}

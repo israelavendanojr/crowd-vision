@@ -6,6 +6,7 @@ interface VideoPlayerProps {
   onTimeUpdate: () => void;
   gridX?: number;
   gridY?: number;
+  frameId: string; // Add frameId prop
 }
 
 interface DetectionPoint {
@@ -20,6 +21,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   onTimeUpdate,
   gridX = 4,
   gridY = 4,
+  frameId, // Destructure frameId prop
 }) => {
   const [showZones, setShowZones] = useState(false);
   const [showHeatmap, setShowHeatmap] = useState(false);
@@ -41,7 +43,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const loadDetectionData = async () => {
       setDataLoading(true);
       try {
-        const response = await fetch("/coordinates/frame_0000_0ms.txt");
+        const response = await fetch(`/coordinates/${frameId}.txt`);
         const textData = await response.text();
 
         const parsedData: DetectionPoint[] = [];
@@ -64,7 +66,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         setDetectionData(parsedData);
       } catch (error) {
         console.error("Error loading detection data:", error);
-        // Fallback to empty array if file can't be loaded
         setDetectionData([]);
       } finally {
         setDataLoading(false);
@@ -72,7 +73,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     };
 
     loadDetectionData();
-  }, []);
+  }, [frameId]);
 
   // Generate individual blips for each detection point
   const generateHeatmapData = () => {
