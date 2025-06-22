@@ -13,6 +13,8 @@ import { HotZonesChart } from './components/HotZonesChart';
 const App: React.FC = () => {
   const [currentFrame, setCurrentFrame] = useState(0);
   const [videoTime, setVideoTime] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   // Extend the imported CrowdData type with frame_summary
@@ -117,8 +119,28 @@ const App: React.FC = () => {
         
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-          {/* Left Column - Video Player and Frame Analysis */}
-          <div className="lg:col-span-2 bg-gray-700 rounded-lg shadow-lg p-6 border border-gray-600 transition-transform duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-blue-500/50 flex flex-col">
+          {/* Left Column - Video Player */}
+          <div className="lg:col-span-2">
+            <div className="bg-gray-700 rounded-lg shadow-lg p-4 border border-gray-600 transition-transform duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-blue-500/50">
+              <VideoPlayer src={sampleData[currentFrame].image} frame={currentFrame} total={sampleData.length} />
+              <TimelineControls
+                isPlaying={isPlaying}
+                onToggle={() => setIsPlaying(!isPlaying)}
+                onNext={() => setCurrentFrame((prev) => (prev + 1) % sampleData.length)}
+                onPrev={() => setCurrentFrame((prev) => (prev - 1 + sampleData.length) % sampleData.length)}
+                speed={playbackSpeed}
+                setSpeed={setPlaybackSpeed}
+                currentFrame={currentFrame}
+                totalFrames={sampleData.length}
+                setFrame={setCurrentFrame}
+              />
+            </div>
+            
+            {/* Data Visualization Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <RiskTrendChart data={sampleData} currentFrame={currentFrame} />
+              <HotZonesChart data={sampleData} />
+            </div>
             {/* Frame Analysis */}
             <div className="mt-4 pt-4 border-t border-gray-600/50 w-full text-center flex flex-col flex-grow min-h-0">
               <h3 className="text-base font-medium text-gray-100 mb-3">Frame Analysis</h3>
@@ -157,19 +179,13 @@ const App: React.FC = () => {
             <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
               <FlagsPanel flags={sampleData[currentFrame].flags} />
             </div>
+            {/* <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
+              <RiskLevelPieChart data={sampleData} />
+            </div> */}
           </div>
         </div>
 
-        {/* Data Visualization Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <div className="transition-transform duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-blue-500/50">
-            <RiskTrendChart data={sampleData} currentFrame={currentFrame} />
-          </div>
-          
-          <div className="transition-transform duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-blue-500/50">
-            <HotZonesChart data={sampleData} />
-          </div>
-        </div>
+
       </div>
     </div>
   );
