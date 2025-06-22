@@ -25,7 +25,12 @@ export const Header: React.FC<{ data: CrowdData; className?: string }> = ({ data
 
   return (
     <div className={`mb-6 ${className}`}>
-      <h1 className="text-3xl font-bold text-gray-100 mb-2">Crowd Danger Detector</h1>
+      <div className="mb-2">
+        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-1">
+          CrowdVision
+        </h1>
+        <p className="text-gray-400 text-sm">AI crowd risk assessment and monitoring</p>
+      </div>
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <Clock className="w-5 h-5 text-gray-400" />

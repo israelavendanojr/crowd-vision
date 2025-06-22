@@ -70,7 +70,7 @@ export const RiskTrendChart: React.FC<Props> = ({ data, currentFrame }) => {
           cx={cx}
           cy={cy}
           r={6}
-          fill={getRiskColor(payload.risk)}
+          fill="#9ca3af"
           stroke="#fff"
           strokeWidth={2}
           className="animate-pulse"
@@ -82,7 +82,7 @@ export const RiskTrendChart: React.FC<Props> = ({ data, currentFrame }) => {
         cx={cx}
         cy={cy}
         r={3}
-        fill={getRiskColor(payload.risk)}
+        fill="#9ca3af"
       />
     );
   };
