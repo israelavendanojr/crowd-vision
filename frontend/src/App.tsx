@@ -10,6 +10,7 @@ import { FlagsPanel } from './components/FlagsPanel';
 import { RiskTrendChart } from './components/RiskTrendChart';
 import { HotZonesChart } from './components/HotZonesChart';
 import { sampleData } from './sampleData';
+import { FrameSummaryModal } from './components/FrameSummaryModal';
 
 const App: React.FC = () => {
   const [currentFrame, setCurrentFrame] = useState(0);
@@ -17,6 +18,7 @@ const App: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Extend the imported CrowdData type with frame_summary
   type ExtendedCrowdData = CrowdData & {
@@ -85,6 +87,19 @@ const App: React.FC = () => {
               <RiskTrendChart data={sampleData} currentFrame={currentFrame} />
               <HotZonesChart data={sampleData} />
             </div>
+            
+            {/* Frame Summary Button */}
+            <div className="mt-4">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h2a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                View Frame Summary
+              </button>
+            </div>
           </div>
 
           {/* Right Column - Status Panels */}
@@ -108,14 +123,21 @@ const App: React.FC = () => {
             <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
               <FlagsPanel flags={sampleData[currentFrame].flags} />
             </div>
-            {/* <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
-              <RiskLevelPieChart data={sampleData} />
-            </div> */}
+            
+            
           </div>
+          
         </div>
 
 
       </div>
+      
+      {/* Frame Summary Modal */}
+      <FrameSummaryModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        summary={sampleData[currentFrame].frame_summary || 'No summary available for this frame.'} 
+      />
     </div>
   );
 };
