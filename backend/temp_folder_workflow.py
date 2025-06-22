@@ -7,20 +7,12 @@ import io
 # --- Frame Extraction Functions ---
 
 def save_frame_as_jpg(frame, output_dir, idx, timestamp_ms):
-    """
-    Saves a single frame as a JPG with index and timestamp in filename.
-    """
     os.makedirs(output_dir, exist_ok=True)
     out_path = os.path.join(output_dir, f"frame_{idx:04d}_{timestamp_ms}ms.jpg")
     cv2.imwrite(out_path, frame)
     return out_path
 
 def extract_frames_every_n(video_path, output_dir="video_frames", n=30):
-    """
-    Extracts every n-th frame from the input video and saves as JPGs in output_dir.
-    Filenames include frame index and timestamp in ms.
-    Returns a list of file paths to the saved frames.
-    """
     cap = cv2.VideoCapture(video_path)
     frame_count = 0
     saved_paths = []
@@ -44,10 +36,6 @@ def extract_frames_every_n(video_path, output_dir="video_frames", n=30):
 # --- Zoning Functions ---
 
 def crop_frame_into_grid_local(frame_bytes: bytes, grid_x: int = 4, grid_y: int = 4):
-    """
-    Splits an input image (JPG or PNG bytes) into a grid_x × grid_y grid of crops using Pillow.
-    Returns: dict with metadata and crops for later reconstruction.
-    """
     image = Image.open(io.BytesIO(frame_bytes))
     width, height = image.size
     zones = []
@@ -77,10 +65,6 @@ def save_zones_from_image(
     grid_x: int = 4,
     grid_y: int = 4
 ):
-    """
-    Splits the image at image_path into zones, saves each zone as an image in output_dir,
-    and returns a list of dicts with grid position and file path.
-    """
     os.makedirs(output_dir, exist_ok=True)
     with open(image_path, "rb") as f:
         img_bytes = f.read()
@@ -98,6 +82,49 @@ def save_zones_from_image(
         })
     return output_info
 
+def save_zone_metadata_for_video(folderwork_dir, grid_x=4, grid_y=4):
+    """
+    Saves a single zones_metadata.txt in the main folderwork_dir,
+    describing the x/y pixel boundaries and center of each zone for the whole video.
+    Uses the first frame found in the folderwork_dir for dimensions.
+    """
+    # Find the first frame image in the first frame folder
+    frame_folders = sorted(
+        [os.path.join(folderwork_dir, d) for d in os.listdir(folderwork_dir) if os.path.isdir(os.path.join(folderwork_dir, d))]
+    )
+    if not frame_folders:
+        print("No frame folders found in", folderwork_dir)
+        return
+
+    first_folder = frame_folders[0]
+    frame_imgs = [f for f in os.listdir(first_folder) if f.endswith('.jpg')]
+    if not frame_imgs:
+        print("No frame image found in", first_folder)
+        return
+
+    frame_path = os.path.join(first_folder, frame_imgs[0])
+
+    with Image.open(frame_path) as img:
+        width, height = img.size
+
+    lines = []
+    for i in range(grid_y):
+        for j in range(grid_x):
+            x0 = int(j * width / grid_x)
+            x1 = int((j + 1) * width / grid_x)
+            y0 = int(i * height / grid_y)
+            y1 = int((i + 1) * height / grid_y)
+            center_x = (x0 + x1) // 2
+            center_y = (y0 + y1) // 2
+            lines.append(
+                f"zone_{i}_{j}: x={x0}-{x1}, y={y0}-{y1}, center=({center_x},{center_y})"
+            )
+
+    out_path = os.path.join(folderwork_dir, "zones_metadata.txt")
+    with open(out_path, "w") as f:
+        f.write("\n".join(lines))
+    print(f"Zone metadata saved to {out_path}")
+
 # --- Main Workflow Function ---
 
 def process_video_to_zoned_frames(
@@ -107,25 +134,16 @@ def process_video_to_zoned_frames(
     grid_x=4,
     grid_y=4
 ):
-    """
-    Main workflow: 
-    - Extracts every n-th frame from the video,
-    - Creates a folder for each frame (with the frame jpg inside),
-    - Creates a zones subfolder with all zone images for that frame.
-    """
-    # Name main output folder after video file (without extension) if not provided
     if main_output_dir is None:
         base_name = os.path.splitext(os.path.basename(video_path))[0]
         main_output_dir = base_name
     os.makedirs(main_output_dir, exist_ok=True)
 
-    # Step 1: Extract frames to a temp folder
     print(f"Extracting frames from {video_path} ...")
     temp_frames_dir = os.path.join(main_output_dir, "_temp_frames")
     frame_paths = extract_frames_every_n(video_path, output_dir=temp_frames_dir, n=frame_interval)
     print(f"Extracted {len(frame_paths)} frames.")
 
-    # Step 2: For each frame, create a subfolder and zone it
     for frame_path in frame_paths:
         frame_name = os.path.splitext(os.path.basename(frame_path))[0]
         frame_folder = os.path.join(main_output_dir, frame_name)
@@ -143,17 +161,18 @@ def process_video_to_zoned_frames(
         zone_infos = save_zones_from_image(frame_path, output_dir=zones_folder, grid_x=grid_x, grid_y=grid_y)
         print(f"  Saved {len(zone_infos)} zones for {frame_name}")
 
-    # Clean up temp frames
-    shutil.rmtree(temp_frames_dir, ignore_errors=True)
+    # Save a single metadata file for the whole video
+    save_zone_metadata_for_video(main_output_dir, grid_x=grid_x, grid_y=grid_y)
 
+    shutil.rmtree(temp_frames_dir, ignore_errors=True)
     print("All frames zoned and saved.")
 
 # --- Script Entrypoint ---
 
 if __name__ == "__main__":
     process_video_to_zoned_frames(
-        video_path="backend/data/test_video_4k.mp4",  # Change as needed
-        main_output_dir="backend/data/folderwork",            # Uses video name by default
+        video_path="data/test_video_4k.mp4",  # Change as needed
+        main_output_dir="data/folderwork",         # Uses video name by default
         frame_interval=30,
         grid_x=4,
         grid_y=4
