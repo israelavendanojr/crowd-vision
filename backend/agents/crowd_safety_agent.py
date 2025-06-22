@@ -4,6 +4,9 @@ from rag_utils import load_vectorstore, search_similar_chunks
 import os
 import base64
 import re
+from vision_language_tool import VisionLanguageTool
+
+
 
 class CrowdSafetyAgent:
     def __init__(self):
@@ -59,73 +62,73 @@ class CrowdSafetyAgent:
         
         return res
     
-    def grid_analyze_crowd(self, folder_path: str) -> str:
-        """Each Frame is already turned into individual zones, each zone is labeled zone_row_column.png,
-           We are going to iterate through all the zone images and analyze the density in each and add it all together
+    # def grid_analyze_crowd(self, folder_path: str) -> str:
+    #     """Each Frame is already turned into individual zones, each zone is labeled zone_row_column.png,
+    #        We are going to iterate through all the zone images and analyze the density in each and add it all together
 
-        Args:
-            folderpath (str): Folder containing zone images
+    #     Args:
+    #         folderpath (str): Folder containing zone images
 
-        Returns:
-            str: description of each folder
-        """
-        res = ""
+    #     Returns:
+    #         str: description of each folder
+    #     """
+    #     res = ""
         
-        ## Getresponse_crowd -> Lookup Guidelings -> Summarize Guideline response
-        for filename in os.listdir(folder_path):
-            full_path = os.path.join(folder_path, filename)
-            crowd_response = self.getresponse_crowd(full_path)
-            guidelines = self.lookup_guidelines(crowd_response)
-            res+= self.zone_report(guidelines)
-        return res
+    #     ## Getresponse_crowd -> Lookup Guidelings -> Summarize Guideline response
+    #     for filename in os.listdir(folder_path):
+    #         full_path = os.path.join(folder_path, filename)
+    #         crowd_response = self.getresponse_crowd(full_path)
+    #         guidelines = self.lookup_guidelines(crowd_response)
+    #         res+= self.zone_report(guidelines)
+    #     return res
     
-    def getresponse_grid(self, folder_path: str):
+    # def getresponse_grid(self, folder_path: str):
         
-        grid_analysis = self.grid_analyze_crowd(folder_path)
+    #     grid_analysis = self.grid_analyze_crowd(folder_path)
 
-        prompt = (
-            "You are a crowd safety expert analyzing a grid-based surveillance system. Each zone follows 'row_column' format (e.g., zone '0_0' = top-left). "
-            "Provide comprehensive safety analysis for ALL zones with: 1) Zone-by-zone density assessment (people/m², risk level with detailed justification), "
-            "2) Movement patterns and bottlenecks, 3) Infrastructure risks and escape routes, 4) Behavioral anomalies and safety concerns, "
-            "5) Inter-zone correlations and cascade risks, 6) Critical intervention requirements with specific personnel/resource needs, "
-            "7) Executive summary with overall threat assessment. Format with clear zone headers for operational use by emergency teams.\n\n"
-            f"GRID ANALYSIS DATA:\n{grid_analysis}\n\n"
-            "Provide detailed analysis ensuring no zone or safety consideration is overlooked - this data guides life-safety decisions."
-        )
+    #     prompt = (
+    #         "You are a crowd safety expert analyzing a grid-based surveillance system. Each zone follows 'row_column' format (e.g., zone '0_0' = top-left). "
+    #         "Provide comprehensive safety analysis for ALL zones with: 1) Zone-by-zone density assessment (people/m², risk level with detailed justification), "
+    #         "2) Movement patterns and bottlenecks, 3) Infrastructure risks and escape routes, 4) Behavioral anomalies and safety concerns, "
+    #         "5) Inter-zone correlations and cascade risks, 6) Critical intervention requirements with specific personnel/resource needs, "
+    #         "7) Executive summary with overall threat assessment. Format with clear zone headers for operational use by emergency teams.\n\n"
+    #         f"GRID ANALYSIS DATA:\n{grid_analysis}\n\n"
+    #         "Provide detailed analysis ensuring no zone or safety consideration is overlooked - this data guides life-safety decisions."
+    #     )
 
-        response = self.client.chat.completions.create(
-            model="Llama-4-Maverick-17B-128E-Instruct-FP8",
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
-        )
+    #     response = self.client.chat.completions.create(
+    #         model="Llama-4-Maverick-17B-128E-Instruct-FP8",
+    #         messages=[
+    #             {"role": "user", "content": prompt}
+    #         ],
+    #     )
 
-        return response.completion_message.content.text
+    #     return response.completion_message.content.text
     
-    def getresponse_crowd(self, image_path: str) -> str:
+    # def getresponse_crowd(self, image_path: str) -> str:
         
-        crowd_summary = self._analyze_crowd_density(image_path)  
-        zone_match = re.search(r'zone_(\d+_\d+)', image_path)
-        zone_label = zone_match.group(1) if zone_match else "UNKNOWN_ZONE"
+    #     crowd_summary = self._analyze_crowd_density(image_path)  
+    #     zone_match = re.search(r'zone_(\d+_\d+)', image_path)
+    #     zone_label = zone_match.group(1) if zone_match else "UNKNOWN_ZONE"
 
-        prompt = (
-            f"Analyze surveillance data for zone {zone_label} from computer vision crowd monitoring. Provide comprehensive description including: "
-            f"1) Spatial layout and infrastructure, 2) Precise crowd density (people/m²) and distribution patterns, 3) Movement flows and directional conflicts, "
-            f"4) Crowd clustering and social organization, 5) Bottlenecks and movement restrictions, 6) Behavioral indicators and anomalies, "
-            f"7) Safety risk indicators and stability assessment, 8) Temporal dynamics and trend analysis. "
-            f"Write 200-300 words with clinical precision for integration with other zone analyses.\n\n"
-            f"ZONE {zone_label} COMPUTER VISION DATA:\n{crowd_summary}\n\n"
-            f"Reference zone {zone_label} throughout for spatial correlation with adjacent zones."
-        )
+    #     prompt = (
+    #         f"Analyze surveillance data for zone {zone_label} from computer vision crowd monitoring. Provide comprehensive description including: "
+    #         f"1) Spatial layout and infrastructure, 2) Precise crowd density (people/m²) and distribution patterns, 3) Movement flows and directional conflicts, "
+    #         f"4) Crowd clustering and social organization, 5) Bottlenecks and movement restrictions, 6) Behavioral indicators and anomalies, "
+    #         f"7) Safety risk indicators and stability assessment, 8) Temporal dynamics and trend analysis. "
+    #         f"Write 200-300 words with clinical precision for integration with other zone analyses.\n\n"
+    #         f"ZONE {zone_label} COMPUTER VISION DATA:\n{crowd_summary}\n\n"
+    #         f"Reference zone {zone_label} throughout for spatial correlation with adjacent zones."
+    #     )
         
-        response = self.client.chat.completions.create(
-            model="Llama-4-Maverick-17B-128E-Instruct-FP8",
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
-        )
+    #     response = self.client.chat.completions.create(
+    #         model="Llama-4-Maverick-17B-128E-Instruct-FP8",
+    #         messages=[
+    #             {"role": "user", "content": prompt}
+    #         ],
+    #     )
         
-        return response.completion_message.content.text
+    #     return response.completion_message.content.text
         
     def lookup_guidelines(self, situation: str, top_k: int = 3) -> str:
         
@@ -155,24 +158,44 @@ class CrowdSafetyAgent:
 
         return response.completion_message.content.text
 
-    def zone_report(self, detailed_response: str) -> str:
-        """
-        Takes a longform safety guideline explanation and summarizes it into key takeaways.
-        Ideal for alerts or summary sections in a report.
-        """
-        prompt = (
-            f"Extract and organize ALL critical safety data from this analysis for operational use. Preserve complete information for: "
-            f"1) Zone identification and spatial context, 2) All safety concerns with severity levels, 3) Complete risk assessments and classifications, "
-            f"4) Behavioral observations and crowd dynamics, 5) All intervention recommendations with timelines/resources, 6) Technical metrics and measurements, "
-            f"7) Emergency response requirements, 8) Monitoring and follow-up needs. Organize with clear headers for rapid decision-making by emergency personnel. "
-            f"DO NOT summarize - extract complete detailed information while maintaining zone spatial context throughout.\n\n"
-            f"DETAILED SAFETY ANALYSIS:\n{detailed_response}\n\n"
-            f"Structure for integration with other zone reports while preserving all critical safety information."
-        )
+    # def zone_report(self, detailed_response: str) -> str:
+    #     """
+    #     Takes a longform safety guideline explanation and summarizes it into key takeaways.
+    #     Ideal for alerts or summary sections in a report.
+    #     """
+    #     prompt = (
+    #         f"Extract and organize ALL critical safety data from this analysis for operational use. Preserve complete information for: "
+    #         f"1) Zone identification and spatial context, 2) All safety concerns with severity levels, 3) Complete risk assessments and classifications, "
+    #         f"4) Behavioral observations and crowd dynamics, 5) All intervention recommendations with timelines/resources, 6) Technical metrics and measurements, "
+    #         f"7) Emergency response requirements, 8) Monitoring and follow-up needs. Organize with clear headers for rapid decision-making by emergency personnel. "
+    #         f"DO NOT summarize - extract complete detailed information while maintaining zone spatial context throughout.\n\n"
+    #         f"DETAILED SAFETY ANALYSIS:\n{detailed_response}\n\n"
+    #         f"Structure for integration with other zone reports while preserving all critical safety information."
+    #     )
 
-        response = self.client.chat.completions.create(
-            model="Llama-4-Maverick-17B-128E-Instruct-FP8",
-            messages=[{"role": "user", "content": prompt}],
-        )
+    #     response = self.client.chat.completions.create(
+    #         model="Llama-4-Maverick-17B-128E-Instruct-FP8",
+    #         messages=[{"role": "user", "content": prompt}],
+    #     )
 
-        return response.completion_message.content.text
+    #     return response.completion_message.content.text
+
+    def get_zone_captions(self, zones_folder_path: str):
+        """
+        Returns a list of zone descriptions from the vision-language tool.
+        Each item is { "zone": zone_id, "description": text }
+        """
+        results = []
+
+        for filename in sorted(os.listdir(zones_folder_path)):
+            if filename.endswith(".png"):
+                zone_path = os.path.join(zones_folder_path, filename)
+                zone_label = filename.replace(".png", "")
+                caption = self.vision_tool.describe_zone(zone_path)
+                results.append({
+                    "zone": zone_label,
+                    "description": caption
+                })
+
+        return results
+
