@@ -15,15 +15,49 @@ class CrowdSafetyAgent:
         self.project = self.rf.workspace().project("visao-computacional-ywewq")
         self.rfmodel = self.project.version(15).model
         self.people = 0
+        
+        try:
+            self.vectorstore_loaded = load_vectorstore()
+        except Exception as e:
+            print("Load Vector Store Error:", e)
+            self.vectorstore_loaded = False
 
     # This analyzes the crowd for the entire frame
     def _analyze_crowd_density(self, image_path: str) -> str:
         result = self.rfmodel.predict(image_path,confidence=0.01).json()
-        predictions = result.get("predictions", [])
         
-        # Total people only sees the number of people in this specific frame
-        total_people = len(predictions)
-        return result
+        
+        zone_offsets = {
+            "zone_0_0": {"x_offset": 0, "y_offset": 0},
+            "zone_0_1": {"x_offset": 480, "y_offset": 0},
+            "zone_0_2": {"x_offset": 960, "y_offset": 0},
+            "zone_0_3": {"x_offset": 1440, "y_offset": 0},
+            "zone_1_0": {"x_offset": 0, "y_offset": 255},
+            "zone_1_1": {"x_offset": 480, "y_offset": 255},
+            "zone_1_2": {"x_offset": 960, "y_offset": 255},
+            "zone_1_3": {"x_offset": 1440, "y_offset": 255},
+            "zone_2_0": {"x_offset": 0, "y_offset": 511},
+            "zone_2_1": {"x_offset": 480, "y_offset": 511},
+            "zone_2_2": {"x_offset": 960, "y_offset": 511},
+            "zone_2_3": {"x_offset": 1440, "y_offset": 511},
+            "zone_3_0": {"x_offset": 0, "y_offset": 766},
+            "zone_3_1": {"x_offset": 480, "y_offset": 766},
+            "zone_3_2": {"x_offset": 960, "y_offset": 766},
+            "zone_3_3": {"x_offset": 1440, "y_offset": 766},
+        }
+
+        def adjust_detections_to_global(detections, zone_offsets):
+            for det in detections.get("predictions", []):
+                zone_name = os.path.splitext(os.path.basename(det["image_path"]))[0]
+                if zone_name in zone_offsets:
+                    offset = zone_offsets[zone_name]
+                    det["x"] += offset["x_offset"]
+                    det["y"] += offset["y_offset"]
+            return detections
+        
+        res = adjust_detections_to_global(result,zone_offsets)
+        
+        return res
     
     def grid_analyze_crowd(self, folder_path: str) -> str:
         """Each Frame is already turned into individual zones, each zone is labeled zone_row_column.png,
@@ -50,26 +84,13 @@ class CrowdSafetyAgent:
         grid_analysis = self.grid_analyze_crowd(folder_path)
 
         prompt = (
-            "You are a specialist in crowd safety, spatial behavior, and public event risk assessment.\n\n"
-            "The data below represents the output of an AI-based crowd analysis system that has divided a crowd image into labeled zones. "
-            "Each zone is identified in 'row_column' format (e.g., '2_3') and includes descriptions of crowd density, behavior, and spatial features.\n\n"
-
-            "Input:\n"
-            f"{grid_analysis}\n\n"
-
-            "Your task is to produce a detailed diagnostic safety report. Specifically:\n"
-            "1. For **each zone**, provide a thorough safety analysis including:\n"
-            "   - Crowd density level and classification (e.g., sparse, moderate, high, critical).\n"
-            "   - Observed movement behavior (e.g., static, flowing, erratic, bidirectional).\n"
-            "   - Any visible risks (e.g., clustering near exits, compression zones, obstructions, escape route issues).\n"
-            "   - Behavioral anomalies (e.g., unusual gathering, panic movement, restricted flow).\n"
-            "   - Degree of concern: Low / Moderate / High / Critical — and justify it.\n"
-            "2. Then provide a **spatial inference section** that detects:\n"
-            "   - Neighboring zones with correlated risk behavior (e.g., forming pressure corridors or buildup zones).\n"
-            "   - Patterns that could evolve into crowd surges, bottlenecks, or panic conditions.\n"
-            "   - Any directional or multi-zone trends (e.g., crowd flowing diagonally, buildup along a row).\n"
-            "3. Finally, clearly flag any **zones needing immediate intervention** with a label like: [CRITICAL ZONE: 3_2] and explain why.\n\n"
-            "Be extremely detailed, objective, and systematic. Do not summarize. Use clear zone-by-zone headers. This is for operational use by safety managers and emergency planners."
+            "You are a crowd safety expert analyzing a grid-based surveillance system. Each zone follows 'row_column' format (e.g., zone '0_0' = top-left). "
+            "Provide comprehensive safety analysis for ALL zones with: 1) Zone-by-zone density assessment (people/m², risk level with detailed justification), "
+            "2) Movement patterns and bottlenecks, 3) Infrastructure risks and escape routes, 4) Behavioral anomalies and safety concerns, "
+            "5) Inter-zone correlations and cascade risks, 6) Critical intervention requirements with specific personnel/resource needs, "
+            "7) Executive summary with overall threat assessment. Format with clear zone headers for operational use by emergency teams.\n\n"
+            f"GRID ANALYSIS DATA:\n{grid_analysis}\n\n"
+            "Provide detailed analysis ensuring no zone or safety consideration is overlooked - this data guides life-safety decisions."
         )
 
         response = self.client.chat.completions.create(
@@ -84,16 +105,17 @@ class CrowdSafetyAgent:
     def getresponse_crowd(self, image_path: str) -> str:
         
         crowd_summary = self._analyze_crowd_density(image_path)  
+        zone_match = re.search(r'zone_(\d+_\d+)', image_path)
+        zone_label = zone_match.group(1) if zone_match else "UNKNOWN_ZONE"
 
         prompt = (
-            f"You are an expert in public safety, crowd dynamics, and visual scene interpretation. "
-            f"You have been given crowd analysis data for a specific zone within a larger image. "
-            f"The zone is identified as: {image_path} (zone_row_column format). "
-            f"The data includes a computer vision summary that estimates crowd density and patterns in this zone:\n\n"
-            f"{crowd_summary}\n\n"
-            f"Using this information, write a detailed, analytical description of this zone (aim for 100+ words). "
-            f"Focus on spatial layout, crowd clustering, potential movement bottlenecks, density estimation, and any visual signs of risk (e.g., congestion, blockage, abnormal crowd behavior). "
-            f"The description will be used alongside descriptions of other zones for full-scene surge detection and safety assessment, so make your analysis as granular and precise as possible."
+            f"Analyze surveillance data for zone {zone_label} from computer vision crowd monitoring. Provide comprehensive description including: "
+            f"1) Spatial layout and infrastructure, 2) Precise crowd density (people/m²) and distribution patterns, 3) Movement flows and directional conflicts, "
+            f"4) Crowd clustering and social organization, 5) Bottlenecks and movement restrictions, 6) Behavioral indicators and anomalies, "
+            f"7) Safety risk indicators and stability assessment, 8) Temporal dynamics and trend analysis. "
+            f"Write 200-300 words with clinical precision for integration with other zone analyses.\n\n"
+            f"ZONE {zone_label} COMPUTER VISION DATA:\n{crowd_summary}\n\n"
+            f"Reference zone {zone_label} throughout for spatial correlation with adjacent zones."
         )
         
         response = self.client.chat.completions.create(
@@ -106,7 +128,8 @@ class CrowdSafetyAgent:
         return response.completion_message.content.text
         
     def lookup_guidelines(self, situation: str, top_k: int = 3) -> str:
-        if not load_vectorstore():
+        
+        if not self.vectorstore_loaded:
             return "Vector store not found. Please initialize first."
 
         relevant_chunks = search_similar_chunks(situation, top_k)
@@ -115,24 +138,15 @@ class CrowdSafetyAgent:
 
         context = "\n\n".join([chunk['text'] for chunk in relevant_chunks])
         prompt = (
-            f"You are a safety policy expert analyzing crowd situations. "
-            f"Given the safety guidelines below and the situation description, "
-            f"offer a detailed response with specific safety recommendations.\n\n"
-
-            f"You are also provided with zone-specific visual analysis generated by a computer vision system. "
-            f"The zone data includes estimated crowd density and descriptive insights, written to reflect what a trained observer might infer from surveillance footage.\n\n"
-
-            f"Interpret this data as if conducting an on-site crowd safety inspection. "
-            f"Consider common safety principles such as safe crowd density thresholds, bottleneck formation, spatial layout, and access or egress issues. "
-            f"Think carefully about risks, anomalies, and how the scene aligns with or violates standard safety protocols.\n\n"
-
+            f"As a safety policy expert, analyze this crowd situation against safety guidelines and provide comprehensive assessment. "
+            f"Include: 1) Regulatory compliance analysis with specific violations, 2) Risk threshold comparison to safety standards, "
+            f"3) Risk classification by severity and immediacy, 4) Detailed intervention recommendations with personnel/equipment needs, "
+            f"5) Emergency response protocol requirements, 6) Preventive measures and monitoring protocols, 7) Technical safety calculations, "
+            f"8) Operational decision priorities with implementation timelines. Reference specific guidelines supporting your recommendations.\n\n"
             f"SAFETY GUIDELINES:\n{context}\n\n"
-            f"SITUATION:\n{situation}\n\n"
-
-            f"Your goal is to extract and convey every relevant insight related to safety concerns, risk assessment, and possible intervention strategies. "
-            f"Be specific and practical — imagine your analysis will inform real-time decisions by event security teams."
+            f"SITUATION ANALYSIS:\n{situation}\n\n"
+            f"Provide actionable analysis for immediate use by incident commanders and emergency teams."
         )
-
 
         response = self.client.chat.completions.create(
             model="Llama-4-Maverick-17B-128E-Instruct-FP8",
@@ -147,15 +161,13 @@ class CrowdSafetyAgent:
         Ideal for alerts or summary sections in a report.
         """
         prompt = (
-            "You are an expert focused on safety and crowd control operations.\n\n"
-            "Given the detailed safety report below, extract as much information as possible.\n\n"
-            "Include things such as:\n"
-            "- Identify the main safety concern(s)\n"
-            "- Highlight any specific zones, behaviors, or anomalies\n"
-            "- Recommend key actions, briefly\n"
-            "- Indicate the overall risk level (low/moderate/high) if possible\n\n"
-            "Be precise and useful. Avoid repeating filler language from the original text.\n\n"
-            f"DETAILED SAFETY REPORT:\n{detailed_response}\n\n"
+            f"Extract and organize ALL critical safety data from this analysis for operational use. Preserve complete information for: "
+            f"1) Zone identification and spatial context, 2) All safety concerns with severity levels, 3) Complete risk assessments and classifications, "
+            f"4) Behavioral observations and crowd dynamics, 5) All intervention recommendations with timelines/resources, 6) Technical metrics and measurements, "
+            f"7) Emergency response requirements, 8) Monitoring and follow-up needs. Organize with clear headers for rapid decision-making by emergency personnel. "
+            f"DO NOT summarize - extract complete detailed information while maintaining zone spatial context throughout.\n\n"
+            f"DETAILED SAFETY ANALYSIS:\n{detailed_response}\n\n"
+            f"Structure for integration with other zone reports while preserving all critical safety information."
         )
 
         response = self.client.chat.completions.create(

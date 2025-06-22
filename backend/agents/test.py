@@ -9,14 +9,14 @@ load_dotenv()
 def main():
     #print(os.path.exists(r"backend\data\folderwork\frame_0000_0ms\zones"))
     #print(os.path.exists("backend/data/safety_vector_index.index"))
-    try:     
-            
+    try:
+
         agent = CrowdSafetyAgent()
 
         print("\n FULL REPORT FOR FRAME 0000")
         full_description = agent.getresponse_grid(r"backend\data\folderwork\frame_0000_0ms\zones")
         print(full_description)
-      
+        
     except Exception as e:
         print(f"Error: {e}")
 
