@@ -164,7 +164,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                     top: `calc(${(row / gridY) * 100}% + 8px)`,
                   }}
                 >
-                  {`${row}:${col}`}
+                  {`${row}_${col}`}
                 </div>
               )),
             )}
