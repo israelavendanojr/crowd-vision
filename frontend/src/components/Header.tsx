@@ -21,6 +21,7 @@ export const Header: React.FC<{ data: CrowdData; className?: string }> = ({ data
     }
   };
 
+  
   return (
     <div className={`mb-6 ${className}`}>
       <h1 className="text-3xl font-bold text-gray-100 mb-2">Crowd Danger Detector</h1>

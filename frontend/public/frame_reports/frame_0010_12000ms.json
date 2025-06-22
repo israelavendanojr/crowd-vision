@@ -1,0 +1,23 @@
+{
+  "risk_level": "High",
+  "risk_trend": "Increasing",
+  "hot_zones": [
+    "0_0",
+    "1_1",
+    "3_2"
+  ],
+  "timestamp": 12.0,
+  "text_summary": "The overall risk assessment is Moderate to High due to observed crowd densities and potential bottlenecks. Zones 0_0, 1_1, and 3_2 are of particular concern due to high crowd densities and potential overcrowding. Immediate attention is required to manage crowd distribution and prevent overcrowding. Potential infrastructure risks and inadequate facilities have been identified in several zones. Enhanced monitoring and crowd management strategies are necessary to mitigate risks.",
+  "insights": [
+    "Crowd crush risk in zones 0_0, 1_1, and 3_2",
+    "Exit blockage potential in zones 1_1 and 3_2",
+    "Security deployment needed in high-risk zones",
+    "Insufficient toilet facilities in zone 1_2"
+  ],
+  "flags": [
+    "EMERGENCY CROWD - CRUSH RISK",
+    "HIGH DENSITY"
+  ],
+  "protocol": "Deploy additional crowd management personnel to high-risk zones, improve signage in zones with potential bottlenecks, and enhance surveillance in high-risk zones. Establish clear communication channels and define emergency response procedures. Continuously monitor crowd densities and distribution in high-risk zones.",
+  "frame_index": 10
+}

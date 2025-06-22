@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { CrowdData } from './types';
+import { framesData } from './framesData';
 import { Header } from './components/Header';
 import { VideoPlayer } from './components/VideoPlayer';
 import { TimelineControls } from './components/TimelineControls';
@@ -17,52 +17,40 @@ const App: React.FC = () => {
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  // Extend the imported CrowdData type with frame_summary
-  type ExtendedCrowdData = CrowdData & {
-    frame_summary?: string;
-  };
+  // State for loaded report and coordinates for the current frame
+  const [currentReport, setCurrentReport] = useState<any>(null);
+  const [currentCoordinates, setCurrentCoordinates] = useState<any[]>([]);
 
-  const sampleData: ExtendedCrowdData[] = [
-    {
-      time_stamp: "2024-06-21T14:30:00Z",
-      image: "http://localhost:5001/video/test_video_4k.mp4", // <-- update this line
-      risk_level: "LOW",
-      risk_trend: "STABLE",
-      hot_zones: ["Zone A", "Zone C"],
-      summary: "Crowd density is within normal parameters. No immediate safety concerns detected.",
-      insights: "Peak traffic expected in 15–20 minutes based on historical patterns.",
-      protocol: "Continue standard monitoring procedures.",
-      flags: ["NORMAL_OPERATIONS"],
-      frame_summary: "Initial frame shows minimal crowd activity with even distribution. Entry points are clear, and the main concourse has light foot traffic. No signs of congestion or bottlenecks detected. Security personnel are visible and positioned at key locations. The environment appears calm and well-managed."
-    },
-    {
-      time_stamp: "2024-06-21T14:30:23Z",
-      image: "./backend/data/test_video_4k.mp4",
-      risk_level: "MEDIUM",
-      risk_trend: "INCREASING",
-      hot_zones: ["Zone A", "Zone B", "Zone D"],
-      summary: "Crowd density increasing in multiple zones. Elevated attention required.",
-      insights: "Bottleneck formation detected near main entrance. Consider crowd flow management.",
-      protocol: "Deploy additional personnel to Zone A and B. Monitor closely.",
-      flags: ["CROWD_BUILDUP", "BOTTLENECK_DETECTED"],
-      frame_summary: "Noticeable increase in crowd density, particularly near the main entrance. Zone A shows signs of congestion with reduced movement speed. Security personnel are redirecting foot traffic to less crowded areas. The eastern corridor is becoming congested as visitors enter in large groups. Staff are actively monitoring the situation and implementing crowd control measures."
-    },
-    {
-      time_stamp: "2024-06-21T14:30:46Z",
-      image: "./backend/data/test_video_4k.mp4",
-      risk_level: "HIGH",
-      risk_trend: "INCREASING",
-      hot_zones: ["Zone A", "Zone B", "Zone C", "Zone D"],
-      summary: "CRITICAL: Dangerous crowd density levels detected. Immediate intervention required.",
-      insights: "Crowd crush risk in Zone A. Emergency exits may become inaccessible.",
-      protocol: "EMERGENCY PROTOCOL ACTIVATED. Initiate crowd dispersal procedures immediately.",
-      flags: ["EMERGENCY", "CROWD_CRUSH_RISK", "EXIT_BLOCKAGE"],
-      frame_summary: "CRITICAL SITUATION: Severe overcrowding detected in multiple zones. Zone A shows signs of crowd crush risk with extremely limited movement. Emergency exits are becoming blocked by the crowd. Security personnel are implementing emergency protocols. Immediate action required to prevent dangerous conditions. Evacuation procedures have been initiated. Crowd control barriers are being deployed to manage flow and prevent further congestion."
-    }
-  ];
+  // Load report JSON and coordinates for the current frame
+  useEffect(() => {
+    const frame = framesData[currentFrame];
+    // Load JSON report
+    fetch(frame.reportFile)
+      .then(res => res.json())
+      .then(setCurrentReport)
+      .catch(() => setCurrentReport(null));
+    // Load coordinates (parse txt file)
+    fetch(frame.coordinatesFile)
+      .then(res => res.text())
+      .then(txt => {
+        // Parse lines like: "  Class: person, x: 263, y: 91, confidence: 0.29"
+        const coords = txt
+          .split('\n')
+          .map(line => {
+            const match = line.match(/Class: person, x: (\d+), y: (\d+), confidence: ([\d.]+)/);
+            if (match) {
+              return { x: Number(match[1]), y: Number(match[2]), confidence: Number(match[3]) };
+            }
+            return null;
+          })
+          .filter(Boolean);
+        setCurrentCoordinates(coords as any[]);
+      })
+      .catch(() => setCurrentCoordinates([]));
+  }, [currentFrame]);
 
-  // Parse time_stamps to seconds (relative to video start)
-  const frameTimes = sampleData.map(d => new Date(d.time_stamp).getTime() / 1000);
+  // Timeline logic based on framesData timestamps
+  const frameTimes = framesData.map(d => d.timestampMs / 1000);
   const videoStart = frameTimes[0];
   const relativeFrameTimes = frameTimes.map(t => t - videoStart);
 
@@ -84,11 +72,19 @@ const App: React.FC = () => {
   // Timeline event indicators (as percentages)
   const eventPercents = relativeFrameTimes.map(t => (t / (relativeFrameTimes[relativeFrameTimes.length - 1])) * 100);
 
+  // For charts: load all reports (for HotZonesChart, RiskTrendChart, etc.)
+  const [allReports, setAllReports] = useState<any[]>([]);
+  useEffect(() => {
+    Promise.all(framesData.map(frame =>
+      fetch(frame.reportFile).then(res => res.json()).catch(() => null)
+    )).then(setAllReports);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-6 text-gray-200">
       <div className="max-w-7xl mx-auto">
-        <Header data={sampleData[currentFrame]} />
-        
+        <Header data={currentReport} />
+
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           {/* Left Column - Video Player */}
@@ -98,10 +94,12 @@ const App: React.FC = () => {
                 src="/video/test_video_4k.mp4"
                 videoRef={videoRef}
                 onTimeUpdate={handleTimeUpdate}
+                heatmapData={currentCoordinates}
+                showHeatmap={true}
               />
               <TimelineControls
                 eventPercents={eventPercents}
-                eventTitles={sampleData.map(d => `Event at ${d.time_stamp}`)}
+                eventTitles={framesData.map(d => `Event at ${d.timestampMs}ms`)}
                 onEventClick={i => {
                   if (videoRef.current) {
                     videoRef.current.currentTime = relativeFrameTimes[i];
@@ -109,14 +107,14 @@ const App: React.FC = () => {
                   }
                 }}
                 progressPercent={(videoTime / (relativeFrameTimes[relativeFrameTimes.length - 1])) * 100}
-                sampleData={sampleData}
+                sampleData={framesData}
               />
             </div>
-            
+
             {/* Data Visualization Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-              <RiskTrendChart data={sampleData} currentFrame={currentFrame} />
-              <HotZonesChart data={sampleData} />
+              <RiskTrendChart data={allReports.filter(Boolean)} currentFrame={currentFrame} />
+              <HotZonesChart data={allReports.filter(Boolean)} />
             </div>
           </div>
 
@@ -124,30 +122,25 @@ const App: React.FC = () => {
           <div className="space-y-6">
             <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
               <RiskAssessment
-                riskLevel={sampleData[currentFrame].risk_level}
-                riskTrend={sampleData[currentFrame].risk_trend}
-                summary={sampleData[currentFrame].summary}
+                riskLevel={currentReport?.risk_level}
+                riskTrend={currentReport?.risk_trend}
+                summary={currentReport?.text_summary}
               />
             </div>
-            
+
             <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
-              <HotZones zones={sampleData[currentFrame].hot_zones} />
+              <HotZones zones={currentReport?.hot_zones} />
             </div>
-            
+
             <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
-              <InsightsPanel insights={sampleData[currentFrame].insights} protocol={sampleData[currentFrame].protocol} />
+              <InsightsPanel insights={currentReport?.insights} protocol={currentReport?.protocol} />
             </div>
-            
+
             <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
-              <FlagsPanel flags={sampleData[currentFrame].flags} />
+              <FlagsPanel flags={currentReport?.flags} />
             </div>
-            {/* <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
-              <RiskLevelPieChart data={sampleData} />
-            </div> */}
           </div>
         </div>
-
-
       </div>
     </div>
   );
