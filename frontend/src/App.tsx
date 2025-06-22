@@ -7,6 +7,8 @@ import { RiskAssessment } from './components/RiskAssessment';
 import { HotZones } from './components/HotZones';
 import { InsightsPanel } from './components/InsightsPanel';
 import { FlagsPanel } from './components/FlagsPanel';
+import { RiskTrendChart } from './components/RiskTrendChart';
+import { HotZonesChart } from './components/HotZonesChart';
 
 const App: React.FC = () => {
   const [currentFrame, setCurrentFrame] = useState(0);
@@ -71,13 +73,14 @@ const App: React.FC = () => {
     return () => clearInterval(intervalRef.current!);
   }, [isPlaying, playbackSpeed]);
 
-
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-6 text-gray-200">
       <div className="max-w-7xl mx-auto">
         <Header data={currentData} />
+        
+        {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          {/* Left Column - Video Player and Frame Analysis */}
           <div className="lg:col-span-2 bg-gray-700 rounded-lg shadow-lg p-6 border border-gray-600 transition-transform duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-blue-500/50 flex flex-col">
             <div className="flex-grow-0">
               <VideoPlayer src={currentData.image} frame={currentFrame} total={sampleData.length} />
@@ -110,6 +113,7 @@ const App: React.FC = () => {
             </div>
           </div>
 
+          {/* Right Column - Status Panels */}
           <div className="space-y-6">
             <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
               <RiskAssessment
@@ -130,8 +134,17 @@ const App: React.FC = () => {
             <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
               <FlagsPanel flags={currentData.flags} />
             </div>
-            
+          </div>
+        </div>
 
+        {/* Data Visualization Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <div className="transition-transform duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-blue-500/50">
+            <RiskTrendChart data={sampleData} currentFrame={currentFrame} />
+          </div>
+          
+          <div className="transition-transform duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-blue-500/50">
+            <HotZonesChart data={sampleData} />
           </div>
         </div>
       </div>
