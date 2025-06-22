@@ -11,3 +11,4 @@ data/
 venv310/
 backend/venv310
 /coordinates
+/backend/frame_reports

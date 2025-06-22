@@ -1,15 +1,23 @@
 import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from 'recharts';
 import { TrendingUp } from 'lucide-react';
-import { CrowdData } from '../types';
+import { ExtendedCrowdData } from '../types'; // Make sure this type includes time_stamp and risk_level, etc.
 
 interface Props {
-  data: CrowdData[];
+  data: ExtendedCrowdData[];
   currentFrame: number;
 }
 
 const getRiskValue = (level: string): number => {
-  switch (level) {
+  switch (level?.toUpperCase()) {
     case 'LOW': return 1;
     case 'MEDIUM': return 2;
     case 'HIGH': return 3;
@@ -31,8 +39,8 @@ export const RiskTrendChart: React.FC<Props> = ({ data, currentFrame }) => {
     frame: index + 1,
     risk: getRiskValue(item.risk_level),
     riskLevel: item.risk_level,
-    timestamp: new Date(item.time_stamp).toLocaleTimeString(),
-    isCurrentFrame: index === currentFrame
+    timestamp: item.time_stamp,
+    isCurrentFrame: index === currentFrame,
   }));
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -43,8 +51,8 @@ export const RiskTrendChart: React.FC<Props> = ({ data, currentFrame }) => {
           <p className="text-gray-300">{`Frame: ${label}`}</p>
           <p className="text-gray-300">{`Time: ${data.timestamp}`}</p>
           <p className={`font-semibold ${
-            data.riskLevel === 'LOW' ? 'text-green-400' :
-            data.riskLevel === 'MEDIUM' ? 'text-yellow-400' : 'text-red-400'
+            data.riskLevel?.toUpperCase() === 'LOW' ? 'text-green-400' :
+            data.riskLevel?.toUpperCase() === 'MEDIUM' ? 'text-yellow-400' : 'text-red-400'
           }`}>
             {`Risk Level: ${data.riskLevel}`}
           </p>
