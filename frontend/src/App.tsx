@@ -69,7 +69,7 @@ const App: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <Header data={currentData} />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 bg-gray-700 rounded-lg shadow-lg p-6 border border-gray-600">
+          <div className="lg:col-span-2 bg-gray-700 rounded-lg shadow-lg p-6 border border-gray-600 transition-transform duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-blue-500/50">
             <VideoPlayer src={currentData.image} frame={currentFrame} total={sampleData.length} />
             <TimelineControls
               isPlaying={isPlaying}
@@ -84,14 +84,27 @@ const App: React.FC = () => {
             />
           </div>
 
-          <RiskAssessment
-            riskLevel={currentData.risk_level}
-            riskTrend={currentData.risk_trend}
-            summary={currentData.summary}
-          />
-          <HotZones zones={currentData.hot_zones} />
-          <InsightsPanel insights={currentData.insights} protocol={currentData.protocol} />
-          <FlagsPanel flags={currentData.flags} />
+          <div className="space-y-6">
+            <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
+              <RiskAssessment
+                riskLevel={currentData.risk_level}
+                riskTrend={currentData.risk_trend}
+                summary={currentData.summary}
+              />
+            </div>
+            
+            <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
+              <HotZones zones={currentData.hot_zones} />
+            </div>
+            
+            <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
+              <InsightsPanel insights={currentData.insights} protocol={currentData.protocol} />
+            </div>
+            
+            <div className="transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-blue-500/50">
+              <FlagsPanel flags={currentData.flags} />
+            </div>
+          </div>
         </div>
       </div>
     </div>
