@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
 
 interface VideoPlayerProps {
   src: string;
@@ -6,6 +6,12 @@ interface VideoPlayerProps {
   onTimeUpdate: () => void;
   gridX?: number;
   gridY?: number;
+}
+
+interface DetectionPoint {
+  x: number;
+  y: number;
+  confidence: number;
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
@@ -16,27 +22,107 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   gridY = 4,
 }) => {
   const [showZones, setShowZones] = useState(false);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [detectionData, setDetectionData] = useState<DetectionPoint[]>([]);
+  const [dataLoading, setDataLoading] = useState(false);
 
   // For overlay: create arrays for grid lines
-  const verticals = Array.from({ length: gridX - 1 }, (_, i) => ((i + 1) / gridX) * 100);
-  const horizontals = Array.from({ length: gridY - 1 }, (_, i) => ((i + 1) / gridY) * 100);
+  const verticals = Array.from(
+    { length: gridX - 1 },
+    (_, i) => ((i + 1) / gridX) * 100,
+  );
+  const horizontals = Array.from(
+    { length: gridY - 1 },
+    (_, i) => ((i + 1) / gridY) * 100,
+  );
+
+  // Load detection data from file
+  useEffect(() => {
+    const loadDetectionData = async () => {
+      setDataLoading(true);
+      try {
+        const response = await fetch("/test_frame_objs.txt");
+        const textData = await response.text();
+
+        const parsedData: DetectionPoint[] = [];
+        const lines = textData.split("\n");
+
+        for (const line of lines) {
+          // Parse lines like: "  Class: person, x: 263, y: 91, confidence: 0.29"
+          const match = line.match(
+            /Class: person, x: (\d+), y: (\d+), confidence: ([\d.]+)/,
+          );
+          if (match) {
+            parsedData.push({
+              x: parseInt(match[1]),
+              y: parseInt(match[2]),
+              confidence: parseFloat(match[3]),
+            });
+          }
+        }
+
+        setDetectionData(parsedData);
+      } catch (error) {
+        console.error("Error loading detection data:", error);
+        // Fallback to empty array if file can't be loaded
+        setDetectionData([]);
+      } finally {
+        setDataLoading(false);
+      }
+    };
+
+    loadDetectionData();
+  }, []);
+
+  // Generate individual blips for each detection point
+  const generateHeatmapData = () => {
+    if (detectionData.length === 0) return [];
+
+    return detectionData.map((point) => ({
+      // Normalize coordinates to video player dimensions (assuming 1920x1080 source)
+      x: (point.x / 1920) * 100,
+      y: (point.y / 1080) * 100,
+      confidence: point.confidence,
+    }));
+  };
+
+  const heatmapData = generateHeatmapData();
 
   return (
     <div className="mb-4">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-semibold">Live Feed</h2>
-        <button
-          className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-            showZones
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-700 text-gray-200 hover:bg-blue-700 hover:text-white'
-          }`}
-          onClick={() => setShowZones((v) => !v)}
-        >
-          {showZones ? 'Hide Zones' : 'Show Zones'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+              showZones
+                ? "bg-blue-600 text-white"
+                : "bg-gray-700 text-gray-200 hover:bg-blue-700 hover:text-white"
+            }`}
+            onClick={() => setShowZones((v) => !v)}
+          >
+            {showZones ? "Hide Zones" : "Show Zones"}
+          </button>
+          <button
+            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+              dataLoading
+                ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                : showHeatmap
+                  ? "bg-red-600 text-white"
+                  : "bg-gray-700 text-gray-200 hover:bg-red-700 hover:text-white"
+            }`}
+            onClick={() => !dataLoading && setShowHeatmap((v) => !v)}
+            disabled={dataLoading}
+          >
+            {dataLoading
+              ? "Loading..."
+              : showHeatmap
+                ? "Hide Heatmap"
+                : "Show Heatmap"}
+          </button>
+        </div>
       </div>
-      <div className="relative w-full" style={{ height: '360px' }}>
+      <div className="relative w-full" style={{ height: "360px" }}>
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
@@ -75,8 +161,33 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 >
                   {`${row}:${col}`}
                 </div>
-              ))
+              )),
             )}
+          </div>
+        )}
+        {showHeatmap && (
+          <div className="absolute inset-0 pointer-events-none z-10">
+            {heatmapData.map((point, i) => (
+              <div
+                key={`detection-${i}`}
+                className="absolute rounded-full bg-red-500"
+                style={{
+                  left: `${point.x}%`,
+                  top: `${point.y}%`,
+                  width: "4px",
+                  height: "4px",
+                  transform: "translate(-50%, -50%)",
+                  opacity: Math.max(0.6, point.confidence), // Use confidence for opacity
+                }}
+              />
+            ))}
+            {/* Detection info */}
+            <div className="absolute top-4 right-4 bg-black/70 rounded p-2 text-xs text-white">
+              <div className="font-semibold mb-1">Person Detections</div>
+              <div className="text-gray-300">
+                {heatmapData.length} detections found
+              </div>
+            </div>
           </div>
         )}
       </div>
