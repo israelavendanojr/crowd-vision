@@ -5,6 +5,8 @@ import os
 import base64
 import re
 from vision_language_tool import VisionLanguageTool
+import json
+
 
 
 
@@ -18,6 +20,7 @@ class CrowdSafetyAgent:
         self.project = self.rf.workspace().project("visao-computacional-ywewq")
         self.rfmodel = self.project.version(15).model
         self.people = 0
+        # self.vision_tool = VisionLanguageTool()
         
         try:
             self.vectorstore_loaded = load_vectorstore()
@@ -180,22 +183,43 @@ class CrowdSafetyAgent:
 
     #     return response.completion_message.content.text
 
-    def get_zone_captions(self, zones_folder_path: str):
-        """
-        Returns a list of zone descriptions from the vision-language tool.
-        Each item is { "zone": zone_id, "description": text }
-        """
-        results = []
+    # def get_zone_captions(self, zones_folder_path: str):
+    #     """
+    #     Returns a list of zone descriptions from the vision-language tool.
+    #     Each item is { "zone": zone_id, "description": text }
+    #     """
+        
+    #     results = []
 
-        for filename in sorted(os.listdir(zones_folder_path)):
-            if filename.endswith(".png"):
-                zone_path = os.path.join(zones_folder_path, filename)
-                zone_label = filename.replace(".png", "")
-                caption = self.vision_tool.describe_zone(zone_path)
-                results.append({
-                    "zone": zone_label,
-                    "description": caption
-                })
+    #     for filename in sorted(os.listdir(zones_folder_path)):
+    #         if filename.endswith(".png"):
+    #             zone_path = os.path.join(zones_folder_path, filename)
+    #             zone_label = filename.replace(".png", "")
+    #             caption = self.vision_tool.describe_zone(zone_path)
+    #             results.append({
+    #                 "zone": zone_label,
+    #                 "description": caption
+    #             })
 
-        return results
+    #     return results
 
+    def get_frame_caption_by_index(self, index: int, caption_json_path: str = None) -> dict:
+        if caption_json_path is None:
+            # Dynamically resolve path from project root
+            base_dir = os.path.dirname(__file__)
+            caption_json_path = os.path.abspath(os.path.join(base_dir, "description_json", "frame_descriptions_test.json"))
+
+        try:
+            with open(caption_json_path, "r") as f:
+                data = json.load(f)
+
+            if 0 <= index < len(data):
+                return data[index]
+            else:
+                return {"frame": None, "description": "Invalid frame index."}
+
+        except Exception as e:
+            return {"frame": None, "description": f"Error: {e}"}
+
+    def get_frame_index_by_timestamp(self, timestamp_ms: int, interval_ms: int = 1200) -> int:
+        return timestamp_ms // interval_ms
