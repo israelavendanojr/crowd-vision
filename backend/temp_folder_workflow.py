@@ -152,8 +152,8 @@ def process_video_to_zoned_frames(
 
 if __name__ == "__main__":
     process_video_to_zoned_frames(
-        video_path="data/test_video_4k.mp4",  # Change as needed
-        main_output_dir=None,            # Uses video name by default
+        video_path="backend/data/test_video_4k.mp4",  # Change as needed
+        main_output_dir="backend/data/folderwork",            # Uses video name by default
         frame_interval=30,
         grid_x=4,
         grid_y=4

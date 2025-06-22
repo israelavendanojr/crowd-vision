@@ -11,15 +11,10 @@ def main():
         agent = CrowdSafetyAgent()
 
         # Provide path to a test image
-        test_image_path = "backend/agents/Medium Crowd Image.png"
-        
-        # Test crowd density analysis (optional)
-        print("=== Crowd Density Analysis ===")
-        density = agent._analyze_crowd_density(test_image_path)
-        print(density)
+        test_image_path = "backend/data/folderwork/frame_0000_0ms/frame_0000_0ms.jpg"
 
         print("\n=== Scene Description using Crowd Density")
-        full_description = agent.getresponse(test_image_path)
+        full_description = agent.getresponse_grid("backend/data/folderwork/frame_0000_0ms/zones")
         print(full_description)
 
     except Exception as e:
