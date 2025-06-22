@@ -7,3 +7,4 @@ frontend/node_modules
 /backend/agents/test.py
 /backend/data
 /backend/agents/__pycache__
+data/
