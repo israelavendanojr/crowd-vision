@@ -6,7 +6,7 @@ export const Header: React.FC<{ data: CrowdData; className?: string }> = ({ data
   if (!data) return null; // 👈 Prevent crash while loading
 
   const getRiskColor = (level: string) => {
-    switch (level) {
+    switch (level.toUpperCase()) {
       case 'LOW': return 'text-green-400 bg-green-900/20 dark:text-green-400 dark:bg-green-900/20';
       case 'MEDIUM': return 'text-yellow-400 bg-yellow-900/20 dark:text-yellow-400 dark:bg-yellow-900/20';
       case 'HIGH': return 'text-red-400 bg-red-900/20 dark:text-red-400 dark:bg-red-900/20';
@@ -15,7 +15,7 @@ export const Header: React.FC<{ data: CrowdData; className?: string }> = ({ data
   };
 
   const getTrendIcon = (trend: string) => {
-    switch (trend) {
+    switch (trend.toUpperCase()) {
       case 'INCREASING': return <TrendingUp className="w-4 h-4 text-red-500" />;
       case 'DECREASING': return <TrendingDown className="w-4 h-4 text-green-500" />;
       case 'STABLE': return <Minus className="w-4 h-4 text-gray-500" />;

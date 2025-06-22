@@ -8,7 +8,7 @@ interface Props {
 }
 
 const getRiskColor = (level: string) => {
-  switch (level) {
+  switch (level.toUpperCase()) {
     case 'LOW': return {
       bg: 'bg-green-900/20',
       text: 'text-green-400'
