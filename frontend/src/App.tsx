@@ -36,7 +36,7 @@ const App: React.FC = () => {
       frame_summary: "Initial frame shows minimal crowd activity with even distribution. Entry points are clear, and the main concourse has light foot traffic. No signs of congestion or bottlenecks detected. Security personnel are visible and positioned at key locations. The environment appears calm and well-managed."
     },
     {
-      time_stamp: "2024-06-21T14:31:00Z",
+      time_stamp: "2024-06-21T14:30:23Z",
       image: "./backend/data/test_video_4k.mp4",
       risk_level: "MEDIUM",
       risk_trend: "INCREASING",
@@ -48,7 +48,7 @@ const App: React.FC = () => {
       frame_summary: "Noticeable increase in crowd density, particularly near the main entrance. Zone A shows signs of congestion with reduced movement speed. Security personnel are redirecting foot traffic to less crowded areas. The eastern corridor is becoming congested as visitors enter in large groups. Staff are actively monitoring the situation and implementing crowd control measures."
     },
     {
-      time_stamp: "2024-06-21T14:32:00Z",
+      time_stamp: "2024-06-21T14:30:46Z",
       image: "./backend/data/test_video_4k.mp4",
       risk_level: "HIGH",
       risk_trend: "INCREASING",
@@ -87,34 +87,6 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-6 text-gray-200">
       <div className="max-w-7xl mx-auto">
-        {/* Video Player */}
-        <video
-          ref={videoRef}
-          width="640"
-          height="360"
-          controls
-          src="video/test_video_4k.mp4"
-          onTimeUpdate={handleTimeUpdate}
-        />
-        {/* Timeline Bar with Event Indicators */}
-        <div className="relative w-full h-4 bg-gray-700 rounded my-4">
-          {eventPercents.map((percent, i) => (
-            <div
-              key={i}
-              className="absolute top-0 h-4 w-1 bg-blue-400"
-              style={{ left: `${percent}%` }}
-              title={`Event at ${sampleData[i].time_stamp}`}
-            />
-          ))}
-          {/* Optionally, a progress bar */}
-          <div
-            className="absolute top-0 left-0 h-4 bg-blue-600 opacity-30"
-            style={{
-              width: `${(videoTime / (relativeFrameTimes[relativeFrameTimes.length - 1])) * 100}%`
-            }}
-          />
-        </div>
-
         <Header data={sampleData[currentFrame]} />
         
         {/* Main Content Grid */}
@@ -122,17 +94,22 @@ const App: React.FC = () => {
           {/* Left Column - Video Player */}
           <div className="lg:col-span-2">
             <div className="bg-gray-700 rounded-lg shadow-lg p-4 border border-gray-600 transition-transform duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-blue-500/50">
-              <VideoPlayer src={sampleData[currentFrame].image} frame={currentFrame} total={sampleData.length} />
+              <VideoPlayer
+                src="/video/test_video_4k.mp4"
+                videoRef={videoRef}
+                onTimeUpdate={handleTimeUpdate}
+              />
               <TimelineControls
-                isPlaying={isPlaying}
-                onToggle={() => setIsPlaying(!isPlaying)}
-                onNext={() => setCurrentFrame((prev) => (prev + 1) % sampleData.length)}
-                onPrev={() => setCurrentFrame((prev) => (prev - 1 + sampleData.length) % sampleData.length)}
-                speed={playbackSpeed}
-                setSpeed={setPlaybackSpeed}
-                currentFrame={currentFrame}
-                totalFrames={sampleData.length}
-                setFrame={setCurrentFrame}
+                eventPercents={eventPercents}
+                eventTitles={sampleData.map(d => `Event at ${d.time_stamp}`)}
+                onEventClick={i => {
+                  if (videoRef.current) {
+                    videoRef.current.currentTime = relativeFrameTimes[i];
+                    setVideoTime(relativeFrameTimes[i]);
+                  }
+                }}
+                progressPercent={(videoTime / (relativeFrameTimes[relativeFrameTimes.length - 1])) * 100}
+                sampleData={sampleData}
               />
             </div>
             

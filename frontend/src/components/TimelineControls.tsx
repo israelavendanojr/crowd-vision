@@ -1,56 +1,36 @@
 import React from 'react';
-import { Play, Pause, SkipBack, SkipForward } from 'lucide-react';
 
 interface Props {
-  isPlaying: boolean;
-  onToggle: () => void;
-  onNext: () => void;
-  onPrev: () => void;
-  speed: number;
-  setSpeed: (s: number) => void;
-  currentFrame: number;
-  totalFrames: number;
-  setFrame: (n: number) => void;
+  eventPercents: number[];
+  eventTitles: string[];
+  onEventClick: (idx: number) => void;
+  progressPercent: number;
 }
 
 export const TimelineControls: React.FC<Props> = ({
-  isPlaying, onToggle, onNext, onPrev, speed, setSpeed, currentFrame, totalFrames, setFrame
+  eventPercents,
+  eventTitles,
+  onEventClick,
+  progressPercent,
 }) => (
-  <div className="space-y-4">
-    <div className="flex items-center gap-4">
-      <button onClick={onPrev} className="p-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-gray-300">
-        <SkipBack className="w-5 h-5" />
-      </button>
-      <button onClick={onToggle} className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg">
-        {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-      </button>
-      <button onClick={onNext} className="p-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-gray-300">
-        <SkipForward className="w-5 h-5" />
-      </button>
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-600">Speed:</span>
-        <select
-          value={speed}
-          onChange={(e) => setSpeed(Number(e.target.value))}
-          className="px-2 py-1 border border-gray-600 rounded text-sm bg-gray-600 text-gray-300"
-        >
-          {[0.5, 1, 2, 4].map(s => <option key={s} value={s}>{s}x</option>)}
-        </select>
-      </div>
-    </div>
-    <div className="relative">
-      <input
-        type="range"
-        min="0"
-        max={totalFrames - 1}
-        value={currentFrame}
-        onChange={(e) => setFrame(Number(e.target.value))}
-        className="w-full h-2 bg-gray-600 rounded-lg"
+  <div className="relative w-full h-4 bg-gray-800 rounded my-4">
+    {eventPercents.map((percent, i) => (
+      <button
+        key={i}
+        type="button"
+        className="absolute top-0 h-4 w-2 bg-blue-400 hover:bg-blue-600 transition-colors rounded focus:outline-none focus:ring-2 focus:ring-blue-400 z-10"
+        style={{ left: `calc(${percent}% - 1px)` }}
+        title={eventTitles[i]}
+        onClick={() => onEventClick(i)}
+        tabIndex={0}
       />
-      <div className="flex justify-between text-xs text-gray-500 mt-1">
-        <span className="text-gray-300">Start</span>
-        <span className="text-gray-300">End</span>
-      </div>
-    </div>
+    ))}
+    {/* Progress bar */}
+    <div
+      className="absolute top-0 left-0 h-4 bg-blue-600 opacity-30"
+      style={{
+        width: `${progressPercent}%`
+      }}
+    />
   </div>
 );
