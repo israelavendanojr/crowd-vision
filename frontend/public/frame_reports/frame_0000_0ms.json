@@ -1,0 +1,28 @@
+{
+  "risk_level": "High",
+  "risk_trend": "Increasing",
+  "hot_zones": [
+    "0_0",
+    "0_1",
+    "0_2",
+    "1_0",
+    "1_1",
+    "1_2",
+    "2_2",
+    "3_0",
+    "3_2"
+  ],
+  "timestamp": 0.0,
+  "text_summary": "The overall threat assessment indicates a high level of risk across multiple zones due to high crowd densities and potential bottlenecks. Immediate action is required to mitigate these risks, including crowd dispersal measures, enhanced surveillance, and deployment of additional security personnel. A comprehensive review of event planning and site layout is necessary to prevent similar risks in future events.",
+  "insights": [
+    "Crowd crush risk",
+    "Exit blockage",
+    "Security deployment needed"
+  ],
+  "flags": [
+    "EMERGENCY CROWD - CRUSH RISK",
+    "HIGH DENSITY"
+  ],
+  "protocol": "Implement crowd dispersal measures, enhance surveillance and monitoring, deploy additional security personnel, review and adjust event schedules, and conduct a thorough review of site layout and event planning.",
+  "frame_index": 0
+}

@@ -1,0 +1,25 @@
+{
+  "risk_level": "High",
+  "risk_trend": "Increasing",
+  "hot_zones": [
+    "0_0",
+    "0_1",
+    "1_3",
+    "2_0",
+    "3_2",
+    "3_3"
+  ],
+  "timestamp": 9.6,
+  "text_summary": "The overall threat assessment indicates a high risk of overcrowding and crowd disasters in multiple zones. Immediate intervention is required to manage crowd densities, prevent bottlenecks, and ensure safe escape routes. Continuous monitoring and coordination between zones are essential to mitigate risks and prevent a cascade of emergencies. High crowd densities are observed in zones 0_0, 0_1, 1_3, 2_0, 3_2, and 3_3.",
+  "insights": [
+    "Crowd crush risk",
+    "Exit blockage",
+    "Security deployment needed"
+  ],
+  "flags": [
+    "EMERGENCY CROWD - CRUSH RISK",
+    "HIGH DENSITY"
+  ],
+  "protocol": "Initiate crowd dispersal and restrict entry to high-risk zones. Enhance surveillance and monitoring. Implement crowd control measures and deploy additional personnel. Review and adjust site layouts, develop emergency response plans, and conduct training.",
+  "frame_index": 8
+}

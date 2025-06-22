@@ -9,6 +9,7 @@ import { InsightsPanel } from './components/InsightsPanel';
 import { FlagsPanel } from './components/FlagsPanel';
 import { RiskTrendChart } from './components/RiskTrendChart';
 import { HotZonesChart } from './components/HotZonesChart';
+import { sampleData } from './sampleData';
 
 const App: React.FC = () => {
   const [currentFrame, setCurrentFrame] = useState(0);
@@ -21,45 +22,6 @@ const App: React.FC = () => {
   type ExtendedCrowdData = CrowdData & {
     frame_summary?: string;
   };
-
-  const sampleData: ExtendedCrowdData[] = [
-    {
-      time_stamp: "2024-06-21T14:30:00Z",
-      image: "http://localhost:5001/video/test_video_4k.mp4", // <-- update this line
-      risk_level: "LOW",
-      risk_trend: "STABLE",
-      hot_zones: ["Zone A", "Zone C"],
-      summary: "Crowd density is within normal parameters. No immediate safety concerns detected.",
-      insights: "Peak traffic expected in 15–20 minutes based on historical patterns.",
-      protocol: "Continue standard monitoring procedures.",
-      flags: ["NORMAL_OPERATIONS"],
-      frame_summary: "Initial frame shows minimal crowd activity with even distribution. Entry points are clear, and the main concourse has light foot traffic. No signs of congestion or bottlenecks detected. Security personnel are visible and positioned at key locations. The environment appears calm and well-managed."
-    },
-    {
-      time_stamp: "2024-06-21T14:30:23Z",
-      image: "./backend/data/test_video_4k.mp4",
-      risk_level: "MEDIUM",
-      risk_trend: "INCREASING",
-      hot_zones: ["Zone A", "Zone B", "Zone D"],
-      summary: "Crowd density increasing in multiple zones. Elevated attention required.",
-      insights: "Bottleneck formation detected near main entrance. Consider crowd flow management.",
-      protocol: "Deploy additional personnel to Zone A and B. Monitor closely.",
-      flags: ["CROWD_BUILDUP", "BOTTLENECK_DETECTED"],
-      frame_summary: "Noticeable increase in crowd density, particularly near the main entrance. Zone A shows signs of congestion with reduced movement speed. Security personnel are redirecting foot traffic to less crowded areas. The eastern corridor is becoming congested as visitors enter in large groups. Staff are actively monitoring the situation and implementing crowd control measures."
-    },
-    {
-      time_stamp: "2024-06-21T14:30:46Z",
-      image: "./backend/data/test_video_4k.mp4",
-      risk_level: "HIGH",
-      risk_trend: "INCREASING",
-      hot_zones: ["Zone A", "Zone B", "Zone C", "Zone D"],
-      summary: "CRITICAL: Dangerous crowd density levels detected. Immediate intervention required.",
-      insights: "Crowd crush risk in Zone A. Emergency exits may become inaccessible.",
-      protocol: "EMERGENCY PROTOCOL ACTIVATED. Initiate crowd dispersal procedures immediately.",
-      flags: ["EMERGENCY", "CROWD_CRUSH_RISK", "EXIT_BLOCKAGE"],
-      frame_summary: "CRITICAL SITUATION: Severe overcrowding detected in multiple zones. Zone A shows signs of crowd crush risk with extremely limited movement. Emergency exits are becoming blocked by the crowd. Security personnel are implementing emergency protocols. Immediate action required to prevent dangerous conditions. Evacuation procedures have been initiated. Crowd control barriers are being deployed to manage flow and prevent further congestion."
-    }
-  ];
 
   // Parse time_stamps to seconds (relative to video start)
   const frameTimes = sampleData.map(d => new Date(d.time_stamp).getTime() / 1000);

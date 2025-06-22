@@ -1,0 +1,23 @@
+{
+  "risk_level": "High",
+  "risk_trend": "Increasing",
+  "hot_zones": [
+    "0_2",
+    "1_1",
+    "1_2",
+    "2_1"
+  ],
+  "timestamp": 7.2,
+  "text_summary": "The overall threat assessment indicates a high risk level across the event area due to overcrowding, crowd pressure, and potential bottlenecks in multiple zones. Continuous monitoring and crowd management are critical. Several zones exceed recommended crowd density thresholds, violating safety guidelines. Emergency response planning and training are essential to mitigate these risks.",
+  "insights": [
+    "Crowd crush risk in zones 0_2, 1_1, 1_2",
+    "Exit blockage potential in zones 2_0, 3_0",
+    "Security deployment needed in high-risk zones"
+  ],
+  "flags": [
+    "**HIGH DENSITY**",
+    "**CROWD CRUSH RISK**"
+  ],
+  "protocol": "Implement crowd management strategies across all zones, enhance surveillance and monitoring, develop comprehensive emergency response plans, and conduct regular training and drills for emergency responders.",
+  "frame_index": 6
+}
