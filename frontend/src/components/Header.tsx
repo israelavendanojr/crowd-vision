@@ -2,7 +2,7 @@ import React from 'react';
 import { Clock, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { CrowdData } from '../types';
 
-export const Header: React.FC<{ data: CrowdData }> = ({ data }) => {
+export const Header: React.FC<{ data: CrowdData; className?: string }> = ({ data, className = '' }) => {
   const getRiskColor = (level: string) => {
     switch (level) {
       case 'LOW': return 'text-green-400 bg-green-900/20 dark:text-green-400 dark:bg-green-900/20';
@@ -22,7 +22,7 @@ export const Header: React.FC<{ data: CrowdData }> = ({ data }) => {
   };
 
   return (
-    <div className="mb-6">
+    <div className={`mb-6 ${className}`}>
       <h1 className="text-3xl font-bold text-gray-100 mb-2">Crowd Danger Detector</h1>
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
